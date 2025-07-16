@@ -28,7 +28,9 @@ class QuoteRequest extends Model
         'responded_at',
         'source',
         'user_agent',
-        'ip_address'
+        'ip_address',
+        'email_sent_at',
+        'email_status'
     ];
 
     protected $casts = [
@@ -38,7 +40,9 @@ class QuoteRequest extends Model
         'pricing_data' => 'array',
         'final_quote_amount' => 'decimal:2',
         'quoted_at' => 'datetime',
-        'responded_at' => 'datetime'
+        'responded_at' => 'datetime',
+        'email_sent_at' => 'datetime',
+        'email_status' => 'array'
     ];
 
     /**

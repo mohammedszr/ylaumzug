@@ -28,7 +28,44 @@ const CalculatorPage = () => {
       <Helmet>
         <title>Umzugskosten berechnen - Kostenloses Angebot | YLA Umzug</title>
         <meta name="description" content="Berechnen Sie Ihre Umzugskosten online. Umzug, Entrümpelung, Putzservice im Saarland & RLP. Sofortiges Angebot, keine versteckten Kosten." />
-        <meta name="keywords" content="umzugskosten berechnen, umzug rechner, entrümpelung kosten, putzservice preise, saarland, rheinland-pfalz" />
+        <meta name="keywords" content="Umzugsrechner, Umzugskosten berechnen, Kostenvoranschlag Umzug, Entrümpelung Kosten, Saarbrücken Umzug Rechner" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "YLA Umzugsrechner",
+            "description": "Kostenloser Online-Rechner für Umzug, Entrümpelung und Hausreinigung in Saarland und Rheinland-Pfalz",
+            "url": "https://yla-umzug.de/rechner",
+            "applicationCategory": "UtilityApplication",
+            "operatingSystem": "Web Browser",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "EUR",
+              "description": "Kostenlose Nutzung des Umzugsrechners"
+            },
+            "provider": {
+              "@type": "LocalBusiness",
+              "name": "YLA Umzugservice",
+              "telephone": "+49-1575-0693353",
+              "email": "info@yla-umzug.de"
+            },
+            "featureList": [
+              "Umzugskosten berechnen",
+              "Entrümpelung Kostenvoranschlag", 
+              "Hausreinigung Preisschätzung",
+              "Sofortiges Angebot",
+              "Bürgergeld-konforme Kostenvoranschläge"
+            ],
+            "screenshot": "https://yla-umzug.de/images/umzugsrechner-screenshot.jpg",
+            "softwareVersion": "2.0",
+            "datePublished": "2025-01-01",
+            "dateModified": "2025-07-16",
+            "inLanguage": "de-DE",
+            "isAccessibleForFree": true,
+            "usageInfo": "Kostenloser Online-Rechner für Umzugs-, Entrümpelungs- und Reinigungskosten"
+          })}
+        </script>
       </Helmet>
       
       <div className="container mx-auto px-6">

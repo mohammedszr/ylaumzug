@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://yla-umzug.de/sitemap.xml
+
+# Block legal pages from indexing but allow following links
+User-agent: *
+Disallow: /agb
+Disallow: /datenschutz  
+Disallow: /impressum
+
+# Allow important pages
+Allow: /
+Allow: /rechner
+Allow: /entruempelung
+Allow: /umzuege
+Allow: /ratgeber
+Allow: /ratgeber-entruempelung-5-schritte
+Allow: /ratgeber-umzug-checkliste
+Allow: /ratgeber-hausreinigung-endreinigung
+Allow: /ratgeber-hartz-iv-umzug-jobcenter
+Allow: /kontakt
+
+# Crawl delay (optional)
+Crawl-delay: 1

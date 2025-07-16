@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Calculator API Routes
 Route::prefix('calculator')->group(function () {
     Route::post('/calculate', [CalculatorController::class, 'calculate']);
+    Route::get('/services', [CalculatorController::class, 'getServices']);
     Route::get('/enabled', [SettingsController::class, 'isCalculatorEnabled']);
 });
 
@@ -39,4 +41,10 @@ Route::prefix('quotes')->group(function () {
 Route::prefix('settings')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [SettingsController::class, 'index']);
     Route::post('/', [SettingsController::class, 'update']);
+});
+
+// Admin API Routes
+Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
+    Route::get('/email/status', [AdminController::class, 'getEmailStatus']);
+    Route::post('/email/test', [AdminController::class, 'sendTestEmail']);
 });

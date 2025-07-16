@@ -29,6 +29,73 @@ const HomePage = () => {
       <Helmet>
         <title>YLA Umzug | Entrümpelung & Entsorgung im Saarland & RLP</title>
         <meta name="description" content="YLA Umzug: Profi für Entrümpelung, Entsorgung & Messi-Haushalte in Saarbrücken, Kaiserslautern, Trier. Fordern Sie jetzt Ihr kostenloses Angebot an!" />
+        <meta name="keywords" content="Entrümpelung Saarbrücken, Haushaltsauflösung Trier, Messi-Wohnung Kaiserslautern, Umzug Rheinland-Pfalz, Entsorgung Saarland" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "YLA Umzug",
+            "description": "Professionelle Entrümpelung, Entsorgung und Umzugsservice im Saarland und Rheinland-Pfalz",
+            "url": "https://yla-umzug.de",
+            "telephone": "+49-1575-0693353",
+            "email": "info@yla-umzug.de",
+            "address": {
+              "@type": "PostalAddress",
+              "addressRegion": "Rheinland-Pfalz, Saarland",
+              "addressCountry": "DE"
+            },
+            "areaServed": [
+              "Saarbrücken",
+              "Trier", 
+              "Kaiserslautern",
+              "Mainz",
+              "Koblenz",
+              "Ludwigshafen"
+            ],
+            "serviceType": [
+              "Entrümpelung",
+              "Haushaltsauflösung", 
+              "Messi-Wohnung Räumung",
+              "Umzugsservice",
+              "Entsorgung",
+              "Endreinigung"
+            ],
+            "priceRange": "€€",
+            "openingHours": "Mo-Sa 08:00-18:00"
+          })}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Was kostet eine Entrümpelung in Saarbrücken oder Trier?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Die Kosten variieren je nach Umfang und Aufwand. Eine 3-Zimmer-Wohnung kostet durchschnittlich 800-1500€. Mit unserer Wertanrechnung können Sie jedoch erheblich sparen."
+                }
+              },
+              {
+                "@type": "Question", 
+                "name": "Wie lange dauert eine Haushaltsauflösung?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Je nach Größe der Wohnung und Menge der Gegenstände dauert eine komplette Haushaltsauflösung zwischen 4-8 Stunden."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Helfen Sie auch bei Messi-Wohnungen?", 
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Ja, wir sind spezialisiert auf die diskrete und einfühlsame Räumung von Messi-Haushalten in Kaiserslautern, Saarbrücken und der gesamten Region."
+                }
+              }
+            ]
+          })}
+        </script>
       </Helmet>
       
       <section className="relative py-20 md:py-32 bg-gray-900 overflow-hidden">
@@ -114,6 +181,103 @@ const HomePage = () => {
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Schnelle Termine</h3>
               <p className="text-gray-400">Wir sind für Sie da in Saarbrücken, Kaiserslautern, Trier und der gesamten Region.</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-gray-900">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Häufig gestellte Fragen</h2>
+            <p className="text-lg text-violet-200 max-w-2xl mx-auto">
+              Hier finden Sie Antworten auf die wichtigsten Fragen zu unseren Dienstleistungen
+            </p>
+          </motion.div>
+          
+          <div className="max-w-4xl mx-auto space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="bg-gray-800/60 p-6 rounded-xl"
+            >
+              <h3 className="text-lg font-semibold text-white mb-2">Was kostet eine Entrümpelung in Saarbrücken oder Trier?</h3>
+              <p className="text-gray-300">Die Kosten variieren je nach Umfang und Aufwand. Eine 3-Zimmer-Wohnung kostet durchschnittlich 800-1500€. Mit unserer Wertanrechnung können Sie jedoch erheblich sparen. Fordern Sie ein kostenloses Angebot an!</p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-gray-800/60 p-6 rounded-xl"
+            >
+              <h3 className="text-lg font-semibold text-white mb-2">Wie lange dauert eine Haushaltsauflösung?</h3>
+              <p className="text-gray-300">Je nach Größe der Wohnung und Menge der Gegenstände dauert eine komplette Haushaltsauflösung zwischen 4-8 Stunden. Wir arbeiten effizient und mit professionellem Equipment.</p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-gray-800/60 p-6 rounded-xl"
+            >
+              <h3 className="text-lg font-semibold text-white mb-2">Helfen Sie auch bei Messi-Wohnungen?</h3>
+              <p className="text-gray-300">Ja, wir sind spezialisiert auf die diskrete und einfühlsame Räumung von Messi-Haushalten. Unser Team arbeitet ohne Vorurteile und mit größter Diskretion in Kaiserslautern, Saarbrücken und der gesamten Region.</p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="bg-gray-800/60 p-6 rounded-xl"
+            >
+              <h3 className="text-lg font-semibold text-white mb-2">Übernimmt das Jobcenter die Umzugskosten bei Bürgergeld?</h3>
+              <p className="text-gray-300">Ja, unter bestimmten Voraussetzungen übernimmt das Jobcenter die Umzugskosten für Bürgergeld-Empfänger. Wir erstellen Ihnen gerne einen rechtskonformen Kostenvoranschlag für das Jobcenter. Mehr dazu in unserem <NavLink to="/ratgeber-hartz-iv-umzug-jobcenter" className="text-violet-400 hover:text-violet-300">Bürgergeld-Umzug Ratgeber</NavLink>.</p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="bg-gray-800/60 p-6 rounded-xl"
+            >
+              <h3 className="text-lg font-semibold text-white mb-2">Entsorgen Sie auch Sondermüll und Elektroschrott?</h3>
+              <p className="text-gray-300">Ja, wir kümmern uns um die fachgerechte Entsorgung aller Materialien inklusive Sondermüll, Elektroschrott und Sperrmüll. Alles wird umweltgerecht und nach gesetzlichen Vorschriften entsorgt.</p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="bg-gray-800/60 p-6 rounded-xl"
+            >
+              <h3 className="text-lg font-semibold text-white mb-2">Bieten Sie auch Endreinigung nach dem Umzug an?</h3>
+              <p className="text-gray-300">Ja, wir bieten professionelle Endreinigung für die Wohnungsübergabe an. So bekommen Sie Ihre Kaution zurück und sparen Zeit. Mehr Infos in unserem <NavLink to="/ratgeber-hausreinigung-endreinigung" className="text-violet-400 hover:text-violet-300">Hausreinigung Ratgeber</NavLink>.</p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+              className="bg-gray-800/60 p-6 rounded-xl"
+            >
+              <h3 className="text-lg font-semibold text-white mb-2">In welchen Regionen sind Sie tätig?</h3>
+              <p className="text-gray-300">Wir sind in ganz Rheinland-Pfalz und dem Saarland tätig, mit Schwerpunkt auf Saarbrücken, Trier, Kaiserslautern, Mainz, Koblenz und Ludwigshafen. Kontaktieren Sie uns für Ihren Standort!</p>
             </motion.div>
           </div>
         </div>

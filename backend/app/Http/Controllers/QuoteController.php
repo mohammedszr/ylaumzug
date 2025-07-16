@@ -6,12 +6,18 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\QuoteRequest;
 use App\Http\Requests\SubmitQuoteRequest;
-use App\Mail\QuoteRequestMail;
-use App\Mail\QuoteConfirmationMail;
-use Illuminate\Support\Facades\Mail;
+use App\Services\EmailNotificationService;
+use App\Jobs\SendQuoteEmailsJob;
 
 class QuoteController extends Controller
 {
+    protected EmailNotificationService $emailService;
+
+    public function __construct(EmailNotificationService $emailService)
+    {
+        $this->emailService = $emailService;
+    }
+
     /**
      * Submit a new quote request
      */
@@ -36,13 +42,23 @@ class QuoteController extends Controller
                 'status' => 'pending'
             ]);
 
-            // Send email to business owner
-            Mail::to(config('mail.business_email', 'info@yla-umzug.de'))
-                ->send(new QuoteRequestMail($quoteRequest));
-
-            // Send confirmation email to customer
-            Mail::to($quoteRequest->email)
-                ->send(new QuoteConfirmationMail($quoteRequest));
+            // Send email notifications (with queue support)
+            if (config('queue.default') !== 'sync') {
+                // Use queue for better reliability in production
+                SendQuoteEmailsJob::dispatch($quoteRequest);
+                \Log::info('Quote emails queued for sending', ['quote_id' => $quoteRequest->id]);
+            } else {
+                // Send immediately for development/testing
+                $emailResults = $this->emailService->sendQuoteNotifications($quoteRequest);
+                
+                // Log if any emails failed (but don't fail the request)
+                if (!$emailResults['business_notification'] || !$emailResults['customer_confirmation']) {
+                    \Log::warning('Some emails failed to send', [
+                        'quote_id' => $quoteRequest->id,
+                        'results' => $emailResults
+                    ]);
+                }
+            }
 
             return response()->json([
                 'success' => true,

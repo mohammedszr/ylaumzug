@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Integration Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .loading { background-color: #fff3cd; color: #856404; }
+        button { margin: 5px; padding: 10px 15px; }
+    </style>
+</head>
+<body>
+    <h1>Calculator API Integration Test</h1>
+    
+    <div>
+        <button onclick="testCalculatorEnabled()">Test Calculator Enabled</button>
+        <button onclick="testCalculatePricing()">Test Calculate Pricing</button>
+        <button onclick="testSubmitQuote()">Test Submit Quote</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+        
+        function addResult(message, type = 'loading') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        async function apiRequest(endpoint, options = {}) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...options.headers,
+                },
+                ...options,
+            };
+
+            try {
+                const response = await fetch(url, config);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${data.message || 'Unknown error'}`);
+                }
+                
+                return data;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function testCalculatorEnabled() {
+            addResult('Testing calculator enabled endpoint...', 'loading');
+            try {
+                const response = await apiRequest('/calculator/enabled');
+                addResult(`Calculator enabled: ${JSON.stringify(response)}`, 'success');
+            } catch (error) {
+                addResult(`Calculator enabled failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCalculatePricing() {
+            addResult('Testing calculate pricing endpoint...', 'loading');
+            try {
+                const testData = {
+                    selectedServices: ['umzug'],
+                    movingDetails: {
+                        apartmentSize: '75',
+                        startAddress: 'Berlin',
+                        endAddress: 'Hamburg'
+                    },
+                    generalInfo: {},
+                    cleaningDetails: {},
+                    declutterDetails: {}
+                };
+                
+                const response = await apiRequest('/calculator/calculate', {
+                    method: 'POST',
+                    body: JSON.stringify(testData)
+                });
+                
+                addResult(`Calculate pricing: ${JSON.stringify(response, null, 2)}`, 'success');
+            } catch (error) {
+                addResult(`Calculate pricing failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSubmitQuote() {
+            addResult('Testing submit quote endpoint...', 'loading');
+            try {
+                const testData = {
+                    name: 'Test User',
+                    email: 'test@example.com',
+                    phone: '+49 123 456789',
+                    selectedServices: ['umzug'],
+                    movingDetails: {
+                        apartmentSize: '75',
+                        startAddress: 'Berlin',
+                        endAddress: 'Hamburg'
+                    },
+                    pricing: {
+                        total: 850,
+                        breakdown: [
+                            { service: 'Umzug', price: 850 }
+                        ]
+                    }
+                };
+                
+                const response = await apiRequest('/quotes/submit', {
+                    method: 'POST',
+                    body: JSON.stringify(testData)
+                });
+                
+                addResult(`Submit quote: ${JSON.stringify(response)}`, 'success');
+            } catch (error) {
+                addResult(`Submit quote failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run basic test on load
+        window.onload = function() {
+            addResult('API Integration Test Started', 'loading');
+            testCalculatorEnabled();
+        };
+    </script>
+</body>
+</html>

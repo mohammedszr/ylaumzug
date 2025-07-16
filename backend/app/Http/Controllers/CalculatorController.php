@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\PricingService;
 use App\Http\Requests\CalculateRequest;
+use App\Models\Service;
 
 class CalculatorController extends Controller
 {
@@ -65,7 +66,7 @@ class CalculatorController extends Controller
     public function getServices(): JsonResponse
     {
         try {
-            $services = $this->pricingService->getAvailableServices();
+            $services = Service::getForFrontend();
             
             return response()->json([
                 'success' => true,

@@ -67,16 +67,16 @@ class PricingService
             }
         }
 
-        // Apply combination discount if multiple services
+        // Apply enhanced combination discount if multiple services
         if (count($services) > 1) {
-            $discount = $this->calculateCombinationDiscount($totalCost, count($services));
-            if ($discount > 0) {
+            $combinationDiscount = $this->calculateEnhancedCombinationDiscount($services, $totalCost);
+            if ($combinationDiscount['discount'] > 0) {
                 $breakdown[] = [
                     'service' => 'Kombinationsrabatt',
-                    'cost' => -$discount,
-                    'details' => [$this->getCombinationDiscountDescription(count($services))]
+                    'cost' => -$combinationDiscount['discount'],
+                    'details' => [$combinationDiscount['description']]
                 ];
-                $totalCost -= $discount;
+                $totalCost -= $combinationDiscount['discount'];
             }
         }
 
@@ -314,12 +314,31 @@ class PricingService
     }
 
     /**
-     * Calculate decluttering-specific costs
+     * Calculate decluttering-specific costs with enhanced volume-based pricing
      */
     private function calculateDeclutterSpecifics(array $data): array
     {
         $breakdown = [];
         $total = 0;
+
+        // Enhanced volume-based pricing
+        $volume = $data['volume'] ?? 'medium';
+        $volumePricing = $this->getVolumeBasedPricing($volume, $data);
+        
+        if ($volumePricing['cost'] > 0) {
+            $breakdown[] = $volumePricing['description'];
+            $total += $volumePricing['cost'];
+        }
+
+        // Object type specific pricing
+        $objectTypes = $data['objectTypes'] ?? [];
+        foreach ($objectTypes as $objectType) {
+            $objectCost = $this->getObjectTypeCost($objectType);
+            if ($objectCost > 0) {
+                $breakdown[] = $this->getObjectTypeDescription($objectType) . ": {$objectCost}€";
+                $total += $objectCost;
+            }
+        }
 
         // Waste type specific surcharges
         $wasteTypes = $data['wasteTypes'] ?? [];
@@ -334,6 +353,20 @@ class PricingService
             $cost = Setting::getValue('electronics_disposal_cost', 100.0);
             $breakdown[] = "Elektrogeräte-Entsorgung: {$cost}€";
             $total += $cost;
+        }
+
+        if (in_array('furniture', $wasteTypes)) {
+            $furnitureCost = Setting::getValue('furniture_disposal_cost', 80.0);
+            $breakdown[] = "Möbel-Entsorgung: {$furnitureCost}€";
+            $total += $furnitureCost;
+        }
+
+        // Access difficulty surcharge
+        $accessDifficulty = $data['accessDifficulty'] ?? 'normal';
+        if ($accessDifficulty === 'difficult') {
+            $difficultyCost = Setting::getValue('access_difficulty_surcharge', 100.0);
+            $breakdown[] = "Erschwerter Zugang: {$difficultyCost}€";
+            $total += $difficultyCost;
         }
 
         // Floor surcharge for decluttering
@@ -352,22 +385,14 @@ class PricingService
     }
 
     /**
-     * Calculate cleaning-specific costs
+     * Calculate cleaning-specific costs using enhanced area-based pricing
      */
     private function calculateCleaningSpecifics(array $data): array
     {
-        $breakdown = [];
-        $total = 0;
-
-        // Window cleaning addon
-        $rooms = $data['rooms'] ?? [];
-        if (in_array('windows', $rooms)) {
-            $size = (int) ($data['size'] ?? 50);
-            $windowRate = Setting::getValue('window_cleaning_rate', 2.0);
-            $cost = $size * $windowRate;
-            $breakdown[] = "Fensterreinigung ({$size}m²): {$cost}€";
-            $total += $cost;
-        }
+        // Use the enhanced area-based pricing method
+        $areaPricing = $this->calculateAreaBasedPricing($data);
+        $breakdown = $areaPricing['breakdown'];
+        $total = $areaPricing['total'];
 
         // Frequency discount
         $frequency = $data['frequency'] ?? 'once';
@@ -615,24 +640,42 @@ class PricingService
     }
 
     /**
-     * Calculate distance between postal codes (simplified)
+     * Calculate distance between postal codes (enhanced)
      */
     private function calculateDistance(string $from, string $to): int
     {
-        // Simplified distance calculation
+        // Enhanced distance calculation with German postal code logic
         // In production, this would use Google Maps Distance Matrix API
+        
+        if ($from === $to) {
+            return 0; // Same postal code
+        }
+        
         $fromCode = (int) $from;
         $toCode = (int) $to;
         
         $difference = abs($fromCode - $toCode);
         
-        // Rough estimation based on postal code difference
-        if ($difference < 100) return 15;
-        if ($difference < 500) return 35;
-        if ($difference < 1000) return 65;
-        if ($difference < 5000) return 120;
+        // German postal code regions (rough estimation)
+        // First digit represents major regions
+        $fromRegion = (int) substr($from, 0, 1);
+        $toRegion = (int) substr($to, 0, 1);
         
-        return 200;
+        // Same region (first digit)
+        if ($fromRegion === $toRegion) {
+            if ($difference < 50) return 10;
+            if ($difference < 200) return 25;
+            if ($difference < 500) return 45;
+            return 80;
+        }
+        
+        // Different regions
+        $regionDifference = abs($fromRegion - $toRegion);
+        if ($regionDifference === 1) return 120; // Adjacent regions
+        if ($regionDifference === 2) return 200; // 2 regions apart
+        if ($regionDifference <= 4) return 350; // 3-4 regions apart
+        
+        return 500; // Far regions (e.g., Hamburg to Munich)
     }
 
     /**
@@ -665,6 +708,198 @@ class PricingService
         ];
         
         return $names[$service] ?? $service;
+    }
+
+    /**
+     * Get volume-based pricing for decluttering services
+     */
+    private function getVolumeBasedPricing(string $volume, array $data): array
+    {
+        $volumePrices = [
+            'low' => Setting::getValue('declutter_volume_low', 300),
+            'medium' => Setting::getValue('declutter_volume_medium', 600),
+            'high' => Setting::getValue('declutter_volume_high', 1200),
+            'extreme' => Setting::getValue('declutter_volume_extreme', 2000)
+        ];
+        
+        $baseCost = $volumePrices[$volume] ?? 600;
+        
+        // Apply room count multiplier if available
+        $rooms = (int) ($data['rooms'] ?? 1);
+        if ($rooms > 3) {
+            $multiplier = 1 + (($rooms - 3) * 0.2); // 20% increase per additional room
+            $baseCost = round($baseCost * $multiplier);
+        }
+        
+        return [
+            'cost' => $baseCost,
+            'description' => "Volumen ({$volume}" . ($rooms > 1 ? ", {$rooms} Räume" : "") . "): {$baseCost}€"
+        ];
+    }
+
+    /**
+     * Get object type specific cost
+     */
+    private function getObjectTypeCost(string $objectType): float
+    {
+        $objectCosts = [
+            'furniture' => Setting::getValue('object_furniture_cost', 50),
+            'appliances' => Setting::getValue('object_appliances_cost', 80),
+            'books' => Setting::getValue('object_books_cost', 30),
+            'clothing' => Setting::getValue('object_clothing_cost', 20),
+            'documents' => Setting::getValue('object_documents_cost', 40),
+            'garden' => Setting::getValue('object_garden_cost', 60),
+            'tools' => Setting::getValue('object_tools_cost', 45)
+        ];
+        
+        return $objectCosts[$objectType] ?? 0;
+    }
+
+    /**
+     * Get object type description
+     */
+    private function getObjectTypeDescription(string $objectType): string
+    {
+        $descriptions = [
+            'furniture' => 'Möbel-Entsorgung',
+            'appliances' => 'Geräte-Entsorgung',
+            'books' => 'Bücher-Entsorgung',
+            'clothing' => 'Kleidung-Entsorgung',
+            'documents' => 'Dokumente-Entsorgung',
+            'garden' => 'Garten-Entsorgung',
+            'tools' => 'Werkzeug-Entsorgung'
+        ];
+        
+        return $descriptions[$objectType] ?? ucfirst($objectType) . '-Entsorgung';
+    }
+
+    /**
+     * Enhanced area-based pricing for cleaning services
+     */
+    private function calculateAreaBasedPricing(array $data): array
+    {
+        $breakdown = [];
+        $total = 0;
+
+        $size = (int) ($data['size'] ?? 50);
+        $intensity = $data['cleaningIntensity'] ?? 'normal';
+        
+        // Base rates per m² by intensity
+        $intensityRates = [
+            'normal' => Setting::getValue('cleaning_rate_normal', 3.0),
+            'deep' => Setting::getValue('cleaning_rate_deep', 5.0),
+            'construction' => Setting::getValue('cleaning_rate_construction', 7.0),
+            'move_out' => Setting::getValue('cleaning_rate_move_out', 6.0)
+        ];
+        
+        $rate = $intensityRates[$intensity] ?? 3.0;
+        $baseCost = $size * $rate;
+        
+        $intensityNames = [
+            'normal' => 'Grundreinigung',
+            'deep' => 'Tiefenreinigung',
+            'construction' => 'Baureinigung',
+            'move_out' => 'Auszugsreinigung'
+        ];
+        
+        $intensityName = $intensityNames[$intensity] ?? 'Reinigung';
+        $breakdown[] = "{$intensityName} ({$size}m²): {$baseCost}€";
+        $total += $baseCost;
+
+        // Room-specific surcharges
+        $rooms = $data['rooms'] ?? [];
+        foreach ($rooms as $room) {
+            $roomCost = $this->getRoomSpecificCost($room, $size);
+            if ($roomCost > 0) {
+                $breakdown[] = $this->getRoomDescription($room) . ": {$roomCost}€";
+                $total += $roomCost;
+            }
+        }
+
+        return [
+            'total' => $total,
+            'breakdown' => $breakdown
+        ];
+    }
+
+    /**
+     * Get room-specific cleaning costs
+     */
+    private function getRoomSpecificCost(string $room, int $size): float
+    {
+        switch ($room) {
+            case 'windows':
+                return $size * Setting::getValue('window_cleaning_rate', 2.0);
+            case 'kitchen':
+                return Setting::getValue('kitchen_deep_clean_cost', 80);
+            case 'bathroom':
+                return Setting::getValue('bathroom_deep_clean_cost', 60);
+            case 'balcony':
+                return Setting::getValue('balcony_clean_cost', 40);
+            case 'basement':
+                return Setting::getValue('basement_clean_cost', 50);
+            default:
+                return 0;
+        }
+    }
+
+    /**
+     * Get room description for cleaning
+     */
+    private function getRoomDescription(string $room): string
+    {
+        $descriptions = [
+            'windows' => 'Fensterreinigung',
+            'kitchen' => 'Küchen-Tiefenreinigung',
+            'bathroom' => 'Bad-Tiefenreinigung',
+            'balcony' => 'Balkonreinigung',
+            'basement' => 'Kellerreinigung'
+        ];
+        
+        return $descriptions[$room] ?? ucfirst($room) . '-Reinigung';
+    }
+
+    /**
+     * Enhanced combination pricing with service-specific discounts
+     */
+    private function calculateEnhancedCombinationDiscount(array $services, float $totalCost): array
+    {
+        $serviceCount = count($services);
+        $discount = 0;
+        $description = '';
+
+        if ($serviceCount < 2) {
+            return ['discount' => 0, 'description' => ''];
+        }
+
+        // Base combination discounts
+        if ($serviceCount >= 3) {
+            $baseDiscount = $totalCost * Setting::getValue('combination_discount_3_services', 0.15);
+            $discount += $baseDiscount;
+            $description = 'Kombinationsrabatt (3+ Services)';
+        } elseif ($serviceCount >= 2) {
+            $baseDiscount = $totalCost * Setting::getValue('combination_discount_2_services', 0.10);
+            $discount += $baseDiscount;
+            $description = 'Kombinationsrabatt (2 Services)';
+        }
+
+        // Special combination bonuses
+        if (in_array('umzug', $services) && in_array('putzservice', $services)) {
+            $movingCleaningBonus = Setting::getValue('moving_cleaning_bonus', 50);
+            $discount += $movingCleaningBonus;
+            $description .= ' + Umzug-Reinigung Bonus';
+        }
+
+        if (in_array('entruempelung', $services) && in_array('putzservice', $services)) {
+            $declutterCleaningBonus = Setting::getValue('declutter_cleaning_bonus', 40);
+            $discount += $declutterCleaningBonus;
+            $description .= ' + Entrümpelung-Reinigung Bonus';
+        }
+
+        return [
+            'discount' => round($discount),
+            'description' => $description
+        ];
     }
 
     /**

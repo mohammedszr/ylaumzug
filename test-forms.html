@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YLA Umzug - Forms Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1f2937;
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #374151;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .checkbox-test {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #6b7280;
+            background: #374151;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .custom-checkbox:hover {
+            border-color: #8b5cf6;
+        }
+        .custom-checkbox.checked {
+            background: #8b5cf6;
+            border-color: #8b5cf6;
+        }
+        .custom-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            background: #374151;
+            border: 2px solid #6b7280;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+        button {
+            background: linear-gradient(to right, #059669, #10b981);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: scale(1.02);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .success {
+            background: #065f46;
+            border: 1px solid #10b981;
+        }
+        .error {
+            background: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>YLA Umzug - Forms & Checkbox Test</h1>
+        
+        <div class="test-section">
+            <h2>✅ Checkbox Functionality Test</h2>
+            <div class="checkbox-test">
+                <div class="custom-checkbox" id="testCheckbox" onclick="toggleCheckbox()"></div>
+                <label for="testCheckbox">
+                    Ich habe die <a href="/datenschutz" style="color: #8b5cf6;">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner personenbezogenen Daten zu. *
+                </label>
+            </div>
+            <div id="checkboxStatus" class="status hidden"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Contact Form Test</h2>
+            <form id="contactForm" onsubmit="handleContactSubmit(event)">
+                <!-- Honeypot field (hidden) -->
+                <div style="display: none;">
+                    <label for="website">Website (leave empty)</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="name">Name *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">E-Mail *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Nachricht *</label>
+                    <textarea id="message" name="message" rows="4" required></textarea>
+                </div>
+                
+                <div class="checkbox-test">
+                    <div class="custom-checkbox" id="contactPrivacy" onclick="toggleContactPrivacy()"></div>
+                    <label for="contactPrivacy">
+                        Ich habe die <a href="/datenschutz" style="color: #8b5cf6;">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner personenbezogenen Daten zu. *
+                    </label>
+                </div>
+                
+                <button type="submit" id="contactSubmit" disabled>Anfrage senden</button>
+            </form>
+            <div id="contactStatus" class="status hidden"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧮 Calculator Form Test</h2>
+            <form id="calculatorForm" onsubmit="handleCalculatorSubmit(event)">
+                <!-- Honeypot field (hidden) -->
+                <div style="display: none;">
+                    <label for="website2">Website (leave empty)</label>
+                    <input type="text" id="website2" name="website2" tabindex="-1" autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="calcName">Vollständiger Name *</label>
+                    <input type="text" id="calcName" name="calcName" placeholder="Max Mustermann" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="calcEmail">E-Mail-Adresse *</label>
+                    <input type="email" id="calcEmail" name="calcEmail" placeholder="max@beispiel.de" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="calcPhone">Telefonnummer *</label>
+                    <input type="tel" id="calcPhone" name="calcPhone" placeholder="+49 1575 0693353" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="calcDate">Wunschtermin (optional)</label>
+                    <input type="date" id="calcDate" name="calcDate">
+                </div>
+                
+                <div class="form-group">
+                    <label for="calcMessage">Zusätzliche Nachricht (optional)</label>
+                    <textarea id="calcMessage" name="calcMessage" rows="3" placeholder="Besondere Wünsche, Fragen oder zusätzliche Informationen..."></textarea>
+                </div>
+                
+                <div class="checkbox-test">
+                    <div class="custom-checkbox" id="calculatorPrivacy" onclick="toggleCalculatorPrivacy()"></div>
+                    <label for="calculatorPrivacy">
+                        Ich habe die <a href="/datenschutz" style="color: #8b5cf6;">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner personenbezogenen Daten zu. *
+                    </label>
+                </div>
+                
+                <button type="submit" id="calculatorSubmit" disabled>Kostenloses Angebot anfordern</button>
+            </form>
+            <div id="calculatorStatus" class="status hidden"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📞 Contact Information</h2>
+            <p><strong>Telefon:</strong> <a href="tel:+4915750693353" style="color: #8b5cf6;">+49 1575 0693353</a></p>
+            <p><strong>E-Mail:</strong> <a href="mailto:info@yla-umzug.de" style="color: #8b5cf6;">info@yla-umzug.de</a></p>
+            <p><strong>Seit:</strong> 2017 Ihr zuverlässiger Partner</p>
+        </div>
+    </div>
+
+    <script>
+        let testCheckboxChecked = false;
+        let contactPrivacyChecked = false;
+        let calculatorPrivacyChecked = false;
+
+        function toggleCheckbox() {
+            testCheckboxChecked = !testCheckboxChecked;
+            const checkbox = document.getElementById('testCheckbox');
+            const status = document.getElementById('checkboxStatus');
+            
+            if (testCheckboxChecked) {
+                checkbox.classList.add('checked');
+                status.textContent = '✅ Checkbox ist aktiviert!';
+                status.className = 'status success';
+            } else {
+                checkbox.classList.remove('checked');
+                status.textContent = '❌ Checkbox ist deaktiviert!';
+                status.className = 'status error';
+            }
+            status.classList.remove('hidden');
+        }
+
+        function toggleContactPrivacy() {
+            contactPrivacyChecked = !contactPrivacyChecked;
+            const checkbox = document.getElementById('contactPrivacy');
+            const submitBtn = document.getElementById('contactSubmit');
+            
+            if (contactPrivacyChecked) {
+                checkbox.classList.add('checked');
+            } else {
+                checkbox.classList.remove('checked');
+            }
+            
+            updateContactSubmitButton();
+        }
+
+        function toggleCalculatorPrivacy() {
+            calculatorPrivacyChecked = !calculatorPrivacyChecked;
+            const checkbox = document.getElementById('calculatorPrivacy');
+            const submitBtn = document.getElementById('calculatorSubmit');
+            
+            if (calculatorPrivacyChecked) {
+                checkbox.classList.add('checked');
+            } else {
+                checkbox.classList.remove('checked');
+            }
+            
+            updateCalculatorSubmitButton();
+        }
+
+        function updateContactSubmitButton() {
+            const form = document.getElementById('contactForm');
+            const submitBtn = document.getElementById('contactSubmit');
+            const name = form.name.value.trim();
+            const email = form.email.value.trim();
+            const message = form.message.value.trim();
+            
+            const isValid = name && email && message && contactPrivacyChecked;
+            submitBtn.disabled = !isValid;
+        }
+
+        function updateCalculatorSubmitButton() {
+            const form = document.getElementById('calculatorForm');
+            const submitBtn = document.getElementById('calculatorSubmit');
+            const name = form.calcName.value.trim();
+            const email = form.calcEmail.value.trim();
+            const phone = form.calcPhone.value.trim();
+            
+            const isValid = name && email && phone && calculatorPrivacyChecked;
+            submitBtn.disabled = !isValid;
+        }
+
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const status = document.getElementById('contactStatus');
+            
+            // Check honeypot
+            if (form.website.value) {
+                return; // Silent fail for bots
+            }
+            
+            if (!contactPrivacyChecked) {
+                status.textContent = '❌ Bitte stimmen Sie der Datenschutzerklärung zu.';
+                status.className = 'status error';
+                status.classList.remove('hidden');
+                return;
+            }
+            
+            status.textContent = '✅ Kontaktformular erfolgreich gesendet! (Test-Modus)';
+            status.className = 'status success';
+            status.classList.remove('hidden');
+        }
+
+        function handleCalculatorSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const status = document.getElementById('calculatorStatus');
+            
+            // Check honeypot
+            if (form.website2.value) {
+                return; // Silent fail for bots
+            }
+            
+            if (!calculatorPrivacyChecked) {
+                status.textContent = '❌ Bitte stimmen Sie der Datenschutzerklärung zu.';
+                status.className = 'status error';
+                status.classList.remove('hidden');
+                return;
+            }
+            
+            status.textContent = '✅ Angebot erfolgreich angefordert! (Test-Modus)';
+            status.className = 'status success';
+            status.classList.remove('hidden');
+        }
+
+        // Add event listeners for form validation
+        document.getElementById('contactForm').addEventListener('input', updateContactSubmitButton);
+        document.getElementById('calculatorForm').addEventListener('input', updateCalculatorSubmitButton);
+
+        // Set minimum date for date input
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('calcDate').setAttribute('min', today);
+    </script>
+</body>
+</html>

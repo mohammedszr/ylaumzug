@@ -210,13 +210,25 @@ export default defineConfig({
 		},
 	},
 	build: {
+		target: 'es2015',
+		minify: 'terser',
+		cssMinify: true,
 		rollupOptions: {
 			external: [
 				'@babel/parser',
 				'@babel/traverse',
 				'@babel/generator',
 				'@babel/types'
-			]
-		}
+			],
+			output: {
+				manualChunks: {
+					vendor: ['react', 'react-dom'],
+					router: ['react-router-dom'],
+					motion: ['framer-motion'],
+					ui: ['lucide-react']
+				}
+			}
+		},
+		chunkSizeWarningLimit: 1000
 	}
 });
