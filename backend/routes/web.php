@@ -22,13 +22,8 @@ Route::get('/', function () {
     ]);
 });
 
-// Admin Panel Routes
-Route::prefix('admin')->middleware(['auth'])->group(function () {
-    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::get('/quotes', [AdminController::class, 'quotes'])->name('admin.quotes');
-    Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
-    Route::post('/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
-});
+// Include admin routes
+require __DIR__.'/admin.php';
 
-// Authentication Routes (if needed)
-Auth::routes(['register' => false]); // Disable registration for admin-only access
+// Authentication Routes would go here if needed
+// For now, using API-based authentication with Sanctum

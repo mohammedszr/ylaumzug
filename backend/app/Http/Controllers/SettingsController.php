@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use App\Models\Setting;
+use Illuminate\Http\JsonResponse;
 
 class SettingsController extends Controller
 {
@@ -13,71 +12,24 @@ class SettingsController extends Controller
      */
     public function isCalculatorEnabled(): JsonResponse
     {
-        try {
-            $enabled = Setting::getValue('calculator_enabled', true);
-            
-            return response()->json([
-                'success' => true,
-                'enabled' => $enabled
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Calculator enabled check error: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => true,
-                'enabled' => true // Default to enabled if error
-            ]);
-        }
+        $enabled = Setting::getValue('calculator_enabled', true);
+        
+        return response()->json([
+            'success' => true,
+            'enabled' => $enabled
+        ]);
     }
 
     /**
-     * Get all settings (admin only)
+     * Get public settings for frontend
      */
-    public function index(): JsonResponse
+    public function getPublicSettings(): JsonResponse
     {
-        try {
-            $settings = Setting::all()->pluck('value', 'key');
-            
-            return response()->json([
-                'success' => true,
-                'settings' => $settings
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Get settings error: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Fehler beim Laden der Einstellungen'
-            ], 500);
-        }
-    }
-
-    /**
-     * Update settings (admin only)
-     */
-    public function update(Request $request): JsonResponse
-    {
-        try {
-            $settings = $request->input('settings', []);
-            
-            foreach ($settings as $key => $value) {
-                Setting::setValue($key, $value);
-            }
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Einstellungen erfolgreich aktualisiert'
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Update settings error: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Fehler beim Aktualisieren der Einstellungen'
-            ], 500);
-        }
+        $settings = Setting::getPublicSettings();
+        
+        return response()->json([
+            'success' => true,
+            'settings' => $settings
+        ]);
     }
 }

@@ -1,7 +1,7 @@
 {
-    "name": "yla-umzug/backend",
+    "name": "yla-umzug/umzugs-und-hausleistungen-rechner-backend",
     "type": "project",
-    "description": "Laravel backend for YLA Umzug calculator and quote system",
+    "description": "Laravel backend for Umzugs und Hausleistungen Rechner YLA Umzug",
     "keywords": ["laravel", "calculator", "quotes", "moving-services"],
     "license": "MIT",
     "require": {

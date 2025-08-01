@@ -1,8 +1,16 @@
-# Laravel Backend for YLA Umzug Calculator
+# Umzugs und Hausleistungen Rechner YLA Umzug - Laravel Backend
 
-## Setup Instructions
+## Overview
 
-This Laravel backend handles the calculator API, quote processing, and admin panel for the YLA Umzug website.
+This Laravel backend provides a clean, modular pricing calculator system with an admin interface for the Umzugs und Hausleistungen Rechner YLA Umzug website.
+
+### Key Features
+- **Modular Calculator System**: Separate calculators for Moving, Decluttering, and Cleaning services
+- **Admin Interface**: Web-based settings management at `/admin/settings`
+- **Database-Driven Configuration**: All pricing stored in database settings
+- **Email & PDF System**: Quote processing with email notifications and PDF generation
+
+## Quick Setup
 
 ### Requirements
 - PHP 8.1+
@@ -12,11 +20,8 @@ This Laravel backend handles the calculator API, quote processing, and admin pan
 
 ### Installation
 
-1. Install PHP and Composer on your system
-2. Run the following commands:
-
 ```bash
-# Install Laravel dependencies
+# Install dependencies
 composer install
 
 # Copy environment file
@@ -33,23 +38,51 @@ php artisan key:generate
 # DB_USERNAME=your_username
 # DB_PASSWORD=your_password
 
-# Run database migrations
-php artisan migrate
+# Run automated setup (migrations + seeders)
+php artisan calculator:setup
 
 # Start development server
 php artisan serve
 ```
 
+## Configuration
+
+### Admin Interface
+Visit `/admin/settings` to configure:
+- Business information
+- Service areas (postal codes)
+- Pricing for all services
+- Discounts and surcharges
+- Toggle calculator on/off
+
 ### API Endpoints
-
-- `POST /api/calculator/calculate` - Calculate pricing for services
+- `POST /api/calculator/calculate` - Calculate pricing
 - `POST /api/quotes/submit` - Submit quote request
-- `GET /api/settings/calculator-enabled` - Check if calculator is enabled
+- `GET /api/calculator/enabled` - Check calculator status
+- `GET /api/settings/public` - Get public settings
 
-### Admin Panel
+## Architecture
 
-Access the admin panel at `/admin` after setting up authentication.
+### Calculator System
+- `MovingPriceCalculator` - Distance, floors, additional services
+- `DeclutterPriceCalculator` - Volume, waste types, access difficulty
+- `CleaningPriceCalculator` - Area-based, room surcharges, frequency discounts
+- `DiscountCalculator` - Combination discounts, express surcharges
+- `DistanceCalculator` - German postal code distance estimation
 
-## Development Notes
+### Database Tables
+- `services` - Service definitions
+- `settings` - All pricing configuration
+- `quote_requests` - Customer quote submissions
 
-This backend is designed to be simple and maintainable by junior developers, following Laravel conventions and best practices.
+## Documentation
+
+For detailed information, see:
+- `REFACTORED_CALCULATOR_GUIDE.md` - Complete system guide
+- `EMAIL_CONFIGURATION_GUIDE.md` - Email setup
+- `PDF_QUOTE_DOCUMENTATION.md` - PDF generation
+- `QUOTE_PROCESSING_GUIDE.md` - Quote management
+
+## Development
+
+The system is designed to be maintainable by junior developers with clear separation of concerns and comprehensive documentation.

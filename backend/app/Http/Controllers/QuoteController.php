@@ -7,15 +7,20 @@ use Illuminate\Http\JsonResponse;
 use App\Models\QuoteRequest;
 use App\Http\Requests\SubmitQuoteRequest;
 use App\Services\EmailNotificationService;
+use App\Services\PdfQuoteService;
 use App\Jobs\SendQuoteEmailsJob;
+use App\Mail\PdfQuoteMail;
+use Illuminate\Support\Facades\Mail;
 
 class QuoteController extends Controller
 {
     protected EmailNotificationService $emailService;
+    protected PdfQuoteService $pdfService;
 
-    public function __construct(EmailNotificationService $emailService)
+    public function __construct(EmailNotificationService $emailService, PdfQuoteService $pdfService)
     {
         $this->emailService = $emailService;
+        $this->pdfService = $pdfService;
     }
 
     /**
@@ -153,6 +158,122 @@ class QuoteController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Fehler beim Aktualisieren des Status'
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate PDF quote (admin only)
+     */
+    public function generatePdf(QuoteRequest $quote): JsonResponse
+    {
+        try {
+            $filename = $this->pdfService->generateQuotePdf($quote);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'PDF erfolgreich generiert',
+                'filename' => $filename,
+                'download_url' => route('quotes.download-pdf', $quote)
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('PDF generation error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler bei der PDF-Generierung: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Download PDF quote (admin only)
+     */
+    public function downloadPdf(QuoteRequest $quote)
+    {
+        try {
+            $pdfContent = $this->pdfService->getPdfContent($quote);
+            $filename = "Angebot-{$quote->quote_number}.pdf";
+
+            return response($pdfContent)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+
+        } catch (\Exception $e) {
+            \Log::error('PDF download error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim PDF-Download: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Send PDF quote via email (admin only)
+     */
+    public function sendPdfQuote(Request $request, QuoteRequest $quote): JsonResponse
+    {
+        try {
+            $request->validate([
+                'final_quote_amount' => 'nullable|numeric|min:0',
+                'admin_notes' => 'nullable|string|max:1000'
+            ]);
+
+            // Update quote with final amount if provided
+            if ($request->has('final_quote_amount')) {
+                $quote->update([
+                    'final_quote_amount' => $request->input('final_quote_amount'),
+                    'admin_notes' => $request->input('admin_notes'),
+                    'status' => 'quoted',
+                    'quoted_at' => now()
+                ]);
+            }
+
+            // Send PDF quote email
+            Mail::to($quote->email)->send(new PdfQuoteMail($quote));
+
+            \Log::info('PDF quote email sent', [
+                'quote_id' => $quote->id,
+                'customer_email' => $quote->email,
+                'final_amount' => $quote->final_quote_amount
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'PDF-Angebot erfolgreich per E-Mail versendet',
+                'quote' => $quote->fresh()
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Send PDF quote error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Versenden des PDF-Angebots: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Preview PDF quote (admin only)
+     */
+    public function previewPdf(QuoteRequest $quote)
+    {
+        try {
+            $pdfContent = $this->pdfService->getPdfContent($quote);
+
+            return response($pdfContent)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'inline');
+
+        } catch (\Exception $e) {
+            \Log::error('PDF preview error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler bei der PDF-Vorschau: ' . $e->getMessage()
             ], 500);
         }
     }

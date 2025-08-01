@@ -14,12 +14,15 @@ return new class extends Migration
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
-            $table->text('value')->nullable();
-            $table->string('type')->default('string'); // string, boolean, integer, json, decimal
-            $table->string('group')->default('general'); // general, calculator, email, business
+            $table->text('value');
+            $table->enum('type', ['string', 'integer', 'float', 'decimal', 'boolean', 'json', 'array'])->default('string');
+            $table->string('group')->nullable();
             $table->text('description')->nullable();
-            $table->boolean('is_public')->default(false); // Can be accessed without auth
+            $table->boolean('is_public')->default(false);
             $table->timestamps();
+
+            $table->index(['group']);
+            $table->index(['is_public']);
         });
     }
 

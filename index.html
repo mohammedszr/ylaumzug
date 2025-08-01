@@ -1,64 +1,76 @@
 <!doctype html>
 <html lang="de">
-	<head>
-		<meta charset="UTF-8" />
-		
-		<!-- Critical Performance Optimizations -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link rel="dns-prefetch" href="//fonts.googleapis.com" />
-		<link rel="dns-prefetch" href="//fonts.gstatic.com" />
-		
-		<!-- Favicon -->
-		<link rel="icon" type="image/svg+xml" href="/vite.svg" />
-		
-		<!-- Meta Tags -->
-		<meta name="generator" content="Hostinger Horizons" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="theme-color" content="#1f2937" />
-		
-		<!-- SEO Meta Tags -->
-		<title>YLA Umzug - Entrümpelung & Entsorgung im Saarland & RLP</title>
-		<meta name="description" content="Professionelle Entrümpelung, Umzug und Putzservice im Saarland und Rheinland-Pfalz. Seit 2017 Ihr zuverlässiger Partner. Kostenlose Besichtigung!" />
-		<meta name="keywords" content="Entrümpelung Saarland, Umzug RLP, Putzservice, Haushaltsauflösung, YLA Umzug" />
-		
-		<!-- Critical CSS Inline -->
-		<style>
-			/* Critical above-the-fold styles */
-			body {
-				margin: 0;
-				padding: 0;
-				background-color: #1f2937;
-				color: white;
-				font-family: system-ui, -apple-system, sans-serif;
+
+<head>
+	<meta charset="UTF-8" />
+
+	<!-- Critical Performance Optimizations -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link rel="dns-prefetch" href="//fonts.googleapis.com" />
+	<link rel="dns-prefetch" href="//fonts.gstatic.com" />
+
+	<!-- Favicon -->
+	<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+	<!-- Meta Tags -->
+	<meta name="generator" content="Hostinger Horizons" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="theme-color" content="#1f2937" />
+
+	<!-- SEO Meta Tags -->
+	<title>Umzugs und Hausleistungen Rechner YLA Umzug - Entrümpelung & Entsorgung im Saarland & RLP</title>
+	<meta name="description"
+		content="Professionelle Entrümpelung, Umzug und Putzservice im Saarland und Rheinland-Pfalz. Seit 2017 Ihr zuverlässiger Partner. Kostenlose Besichtigung!" />
+	<meta name="keywords" content="Entrümpelung Saarland, Umzug RLP, Putzservice, Haushaltsauflösung, YLA Umzug" />
+
+	<!-- Critical CSS Inline -->
+	<style>
+		/* Critical above-the-fold styles */
+		body {
+			margin: 0;
+			padding: 0;
+			background-color: #1f2937;
+			color: white;
+			font-family: system-ui, -apple-system, sans-serif;
+		}
+
+		#root {
+			min-height: 100vh;
+		}
+
+		/* Loading spinner */
+		.loading-spinner {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 40px;
+			height: 40px;
+			border: 3px solid #374151;
+			border-top: 3px solid #8b5cf6;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+		}
+
+		@keyframes spin {
+			0% {
+				transform: translate(-50%, -50%) rotate(0deg);
 			}
-			#root {
-				min-height: 100vh;
+
+			100% {
+				transform: translate(-50%, -50%) rotate(360deg);
 			}
-			/* Loading spinner */
-			.loading-spinner {
-				position: fixed;
-				top: 50%;
-				left: 50%;
-				transform: translate(-50%, -50%);
-				width: 40px;
-				height: 40px;
-				border: 3px solid #374151;
-				border-top: 3px solid #8b5cf6;
-				border-radius: 50%;
-				animation: spin 1s linear infinite;
-			}
-			@keyframes spin {
-				0% { transform: translate(-50%, -50%) rotate(0deg); }
-				100% { transform: translate(-50%, -50%) rotate(360deg); }
-			}
-		</style>
-	</head>
-	<body>
-		<div id="root">
-			<!-- Loading indicator for better perceived performance -->
-			<div class="loading-spinner"></div>
-		</div>
-		<script type="module" src="/src/main.jsx"></script>
-	</body>
+		}
+	</style>
+</head>
+
+<body>
+	<div id="root">
+		<!-- Loading indicator for better perceived performance -->
+		<div class="loading-spinner"></div>
+	</div>
+	<script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

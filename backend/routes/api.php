@@ -5,8 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\AdminController;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -35,16 +33,15 @@ Route::prefix('quotes')->group(function () {
     Route::get('/', [QuoteController::class, 'index'])->middleware('auth:sanctum');
     Route::get('/{quote}', [QuoteController::class, 'show'])->middleware('auth:sanctum');
     Route::patch('/{quote}/status', [QuoteController::class, 'updateStatus'])->middleware('auth:sanctum');
+    
+    // PDF Generation Routes (Admin only)
+    Route::post('/{quote}/generate-pdf', [QuoteController::class, 'generatePdf'])->middleware('auth:sanctum');
+    Route::get('/{quote}/download-pdf', [QuoteController::class, 'downloadPdf'])->middleware('auth:sanctum')->name('quotes.download-pdf');
+    Route::get('/{quote}/preview-pdf', [QuoteController::class, 'previewPdf'])->middleware('auth:sanctum');
+    Route::post('/{quote}/send-pdf', [QuoteController::class, 'sendPdfQuote'])->middleware('auth:sanctum');
 });
 
-// Settings API Routes
-Route::prefix('settings')->middleware('auth:sanctum')->group(function () {
-    Route::get('/', [SettingsController::class, 'index']);
-    Route::post('/', [SettingsController::class, 'update']);
-});
-
-// Admin API Routes
-Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
-    Route::get('/email/status', [AdminController::class, 'getEmailStatus']);
-    Route::post('/email/test', [AdminController::class, 'sendTestEmail']);
+// Public Settings API Routes
+Route::prefix('settings')->group(function () {
+    Route::get('/public', [SettingsController::class, 'getPublicSettings']);
 });
