@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calculator, Euro, CheckCircle, AlertCircle, RefreshCw, Star, Sparkles, TrendingUp, Shield, Clock, Heart } from 'lucide-react';
@@ -9,6 +9,15 @@ const PriceSummary = ({ data, updateData }) => {
   const [estimatedPrice, setEstimatedPrice] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [error, setError] = useState(null);
+
+  // Safety check for data
+  if (!data || !data.selectedServices) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-white">Daten werden geladen...</p>
+      </div>
+    );
+  }
 
   // Calculate estimate using Laravel API
   const calculateEstimate = async () => {
@@ -41,7 +50,7 @@ const PriceSummary = ({ data, updateData }) => {
       console.error('Pricing calculation error:', err);
       setError(err);
       
-      // Show user-friendly error message
+      // Show user-friendly error message and provide fallback pricing
       if (err instanceof ApiError) {
         toast({
           title: "Berechnungsfehler",
@@ -55,6 +64,20 @@ const PriceSummary = ({ data, updateData }) => {
           variant: "destructive",
         });
       }
+      
+      // Provide fallback pricing so user can still proceed
+      setEstimatedPrice({
+        total: 'Auf Anfrage',
+        breakdown: [
+          {
+            service: data.selectedServices[0] || 'Service',
+            details: 'Preis wird nach Besichtigung ermittelt',
+            price: 'Auf Anfrage'
+          }
+        ],
+        currency: 'EUR',
+        disclaimer: 'Der genaue Preis wird nach einer kostenlosen Besichtigung vor Ort ermittelt.'
+      });
     } finally {
       setIsCalculating(false);
     }
@@ -69,11 +92,17 @@ const PriceSummary = ({ data, updateData }) => {
 
 
 
-  useEffect(() => {
-    if (data.selectedServices.length > 0) {
-      calculateEstimate();
+  // Use React.useEffect to calculate estimate when component mounts
+  React.useEffect(() => {
+    if (data.selectedServices.length > 0 && !estimatedPrice && !isCalculating) {
+      // Add a small delay to prevent immediate execution issues
+      const timer = setTimeout(() => {
+        calculateEstimate();
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
-  }, [data]);
+  }, [data.selectedServices]);
 
   return (
     <div className="space-y-6 sm:space-y-8">

@@ -34,6 +34,17 @@ body {
   color: hsl(var(--foreground));
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal overflow */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 html {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -34,36 +34,44 @@ const MovingDetails = ({ data, updateData }) => {
   });
 
   const handleChange = (field, value) => {
+    let newData;
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: { ...prev[parent], [child]: value }
-      }));
+      newData = {
+        ...formData,
+        [parent]: { ...formData[parent], [child]: value }
+      };
     } else {
-      setFormData(prev => ({ ...prev, [field]: value }));
+      newData = { ...formData, [field]: value };
     }
+    setFormData(newData);
+    // Update parent data immediately
+    updateData(newData, 'movingDetails');
   };
 
   const handleFurnitureChange = (item, value) => {
-    setFormData(prev => ({
-      ...prev,
-      furniture: { ...prev.furniture, [item]: Math.max(0, value) }
-    }));
+    const newData = {
+      ...formData,
+      furniture: { ...formData.furniture, [item]: Math.max(0, value) }
+    };
+    setFormData(newData);
+    // Update parent data immediately
+    updateData(newData, 'movingDetails');
   };
 
   const toggleAdditionalService = (service) => {
-    setFormData(prev => ({
-      ...prev,
-      additionalServices: prev.additionalServices.includes(service)
-        ? prev.additionalServices.filter(s => s !== service)
-        : [...prev.additionalServices, service]
-    }));
+    const newData = {
+      ...formData,
+      additionalServices: formData.additionalServices.includes(service)
+        ? formData.additionalServices.filter(s => s !== service)
+        : [...formData.additionalServices, service]
+    };
+    setFormData(newData);
+    // Update parent data immediately
+    updateData(newData, 'movingDetails');
   };
 
-  useEffect(() => {
-    updateData(formData, 'movingDetails');
-  }, [formData, updateData]);
+
 
   const additionalServices = [
     { id: 'assembly', label: 'Möbelabbau & Aufbau' },
@@ -101,6 +109,7 @@ const MovingDetails = ({ data, updateData }) => {
             <CardTitle className="flex items-center space-x-2">
               <MapPin className="h-5 w-5 text-red-500" />
               <span>Auszugsadresse</span>
+              <span className="text-red-400 font-bold">*</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -145,6 +154,7 @@ const MovingDetails = ({ data, updateData }) => {
             <CardTitle className="flex items-center space-x-2">
               <MapPin className="h-5 w-5 text-green-500" />
               <span>Einzugsadresse</span>
+              <span className="text-red-400 font-bold">*</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -205,7 +215,7 @@ const MovingDetails = ({ data, updateData }) => {
               />
             </div>
             <div>
-              <Label>Zimmeranzahl</Label>
+              <Label>Zimmeranzahl <span className="text-red-400 font-bold">*</span></Label>
               <Input
                 type="number"
                 placeholder="z.B. 3"

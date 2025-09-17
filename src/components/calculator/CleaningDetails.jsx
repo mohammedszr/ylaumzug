@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,21 +17,25 @@ const CleaningDetails = ({ data, updateData }) => {
   });
 
   const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const newData = { ...formData, [field]: value };
+    setFormData(newData);
+    // Update parent data immediately
+    updateData(newData, 'cleaningDetails');
   };
 
   const toggleRoom = (room) => {
-    setFormData(prev => ({
-      ...prev,
-      rooms: prev.rooms.includes(room)
-        ? prev.rooms.filter(r => r !== room)
-        : [...prev.rooms, room]
-    }));
+    const newData = {
+      ...formData,
+      rooms: formData.rooms.includes(room)
+        ? formData.rooms.filter(r => r !== room)
+        : [...formData.rooms, room]
+    };
+    setFormData(newData);
+    // Update parent data immediately
+    updateData(newData, 'cleaningDetails');
   };
 
-  useEffect(() => {
-    updateData(formData, 'cleaningDetails');
-  }, [formData, updateData]);
+
 
   const objectTypes = [
     { id: 'apartment', label: 'Wohnung', icon: '🏠' },
@@ -77,6 +81,7 @@ const CleaningDetails = ({ data, updateData }) => {
           <CardTitle className="flex items-center space-x-2">
             <Home className="h-5 w-5 text-violet-600" />
             <span>Objektart</span>
+            <span className="text-red-400 font-bold ml-1">*</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -108,6 +113,7 @@ const CleaningDetails = ({ data, updateData }) => {
             <Label htmlFor="size" className="flex items-center space-x-2 mb-2">
               <Sparkles className="h-4 w-4 text-violet-600" />
               <span>Größe (m²)</span>
+              <span className="text-red-400 font-bold ml-1">*</span>
             </Label>
             <Input
               id="size"
@@ -153,7 +159,7 @@ const CleaningDetails = ({ data, updateData }) => {
       {/* Cleaning Intensity */}
       <Card>
         <CardHeader>
-          <CardTitle>Reinigungsintensität</CardTitle>
+          <CardTitle>Reinigungsintensität <span className="text-red-400 font-bold ml-1">*</span></CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">

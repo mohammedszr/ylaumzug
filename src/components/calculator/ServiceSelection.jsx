@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Truck, Trash2, Sparkles, CheckCircle, Star, Zap, Heart } from 'lucide-react';
@@ -50,11 +50,9 @@ const ServiceSelection = ({ data, updateData }) => {
     // Only allow single selection
     const newSelection = selectedServices.includes(serviceId) ? [] : [serviceId];
     setSelectedServices(newSelection);
+    // Update parent data immediately
+    updateData(newSelection, 'selectedServices');
   };
-
-  useEffect(() => {
-    updateData(selectedServices, 'selectedServices');
-  }, [selectedServices, updateData]);
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -76,6 +74,7 @@ const ServiceSelection = ({ data, updateData }) => {
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-white">
             Welchen Service benötigen Sie?
+            <span className="text-red-400 font-bold ml-2">*</span>
           </h2>
         </motion.div>
         <motion.p 

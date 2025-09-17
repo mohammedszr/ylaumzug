@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,29 +23,34 @@ const DeclutterDetails = ({ data, updateData }) => {
   });
 
   const handleChange = (field, value) => {
+    let newData;
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: { ...prev[parent], [child]: value }
-      }));
+      newData = {
+        ...formData,
+        [parent]: { ...formData[parent], [child]: value }
+      };
     } else {
-      setFormData(prev => ({ ...prev, [field]: value }));
+      newData = { ...formData, [field]: value };
     }
+    setFormData(newData);
+    // Update parent data immediately
+    updateData(newData, 'declutterDetails');
   };
 
   const toggleWasteType = (wasteType) => {
-    setFormData(prev => ({
-      ...prev,
-      wasteTypes: prev.wasteTypes.includes(wasteType)
-        ? prev.wasteTypes.filter(w => w !== wasteType)
-        : [...prev.wasteTypes, wasteType]
-    }));
+    const newData = {
+      ...formData,
+      wasteTypes: formData.wasteTypes.includes(wasteType)
+        ? formData.wasteTypes.filter(w => w !== wasteType)
+        : [...formData.wasteTypes, wasteType]
+    };
+    setFormData(newData);
+    // Update parent data immediately
+    updateData(newData, 'declutterDetails');
   };
 
-  useEffect(() => {
-    updateData(formData, 'declutterDetails');
-  }, [formData, updateData]);
+
 
   const objectTypes = [
     { id: 'apartment', label: 'Wohnung', icon: '🏠' },
@@ -81,6 +86,7 @@ const DeclutterDetails = ({ data, updateData }) => {
           <CardTitle className="flex items-center space-x-2">
             <MapPin className="h-5 w-5 text-violet-600" />
             <span>Adresse der Entrümpelung</span>
+            <span className="text-red-400 font-bold ml-1">*</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -110,6 +116,7 @@ const DeclutterDetails = ({ data, updateData }) => {
           <CardTitle className="flex items-center space-x-2">
             <Home className="h-5 w-5 text-violet-600" />
             <span>Art des Objekts</span>
+            <span className="text-red-400 font-bold ml-1">*</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -145,7 +152,7 @@ const DeclutterDetails = ({ data, updateData }) => {
         <CardContent>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label>Größe (m²)</Label>
+              <Label>Größe (m²) <span className="text-red-400 font-bold">*</span></Label>
               <Input
                 type="number"
                 placeholder="z.B. 50"

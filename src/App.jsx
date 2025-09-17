@@ -18,6 +18,7 @@ const EntruempelungRatgeberPage = lazy(() => import('@/pages/EntruempelungRatgeb
 const UmzugRatgeberPage = lazy(() => import('@/pages/UmzugRatgeberPage'));
 const HausreinigungRatgeberPage = lazy(() => import('@/pages/HausreinigungRatgeberPage'));
 const HartzIVUmzugRatgeberPage = lazy(() => import('@/pages/HartzIVUmzugRatgeberPage'));
+const EntruempelungRegional = lazy(() => import('@/pages/EntruempelungRegional'));
 const AGBPage = lazy(() => import('@/pages/AGBPage'));
 const DatenschutzPage = lazy(() => import('@/pages/DatenschutzPage'));
 const ImpressumPage = lazy(() => import('@/pages/ImpressumPage'));
@@ -33,7 +34,7 @@ function App() {
   const location = useLocation();
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+    <div className="flex flex-col min-h-screen bg-gray-900 text-white w-full overflow-x-hidden">
       <Header />
       <main className="flex-grow">
         <Suspense fallback={<PageLoader />}>
@@ -48,6 +49,7 @@ function App() {
               <Route path="/ratgeber-umzug-checkliste" element={<UmzugRatgeberPage />} />
               <Route path="/ratgeber-hausreinigung-endreinigung" element={<HausreinigungRatgeberPage />} />
               <Route path="/ratgeber-hartz-iv-umzug-jobcenter" element={<HartzIVUmzugRatgeberPage />} />
+              <Route path="/entrümpelung-regional" element={<EntruempelungRegional />} />
               <Route path="/kontakt" element={<ContactPage />} />
               <Route path="/impressum" element={<ImpressumPage />} />
               <Route path="/datenschutz" element={<DatenschutzPage />} />

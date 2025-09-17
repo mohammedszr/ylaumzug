@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,6 +27,8 @@ const GeneralInfo = ({ data, updateData }) => {
   const handleChange = (field, value) => {
     const newData = { ...formData, [field]: value };
     setFormData(newData);
+    // Update parent data immediately
+    updateData(newData, 'generalInfo');
   };
 
   const handleSubmit = async (e) => {
@@ -105,9 +107,7 @@ const GeneralInfo = ({ data, updateData }) => {
     }
   };
 
-  useEffect(() => {
-    updateData(formData, 'generalInfo');
-  }, [formData, updateData]);
+
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -223,7 +223,8 @@ const GeneralInfo = ({ data, updateData }) => {
                   <div className="bg-gradient-to-r from-violet-500 to-purple-600 p-1 rounded-lg">
                     <User className="h-3 w-3 text-white" />
                   </div>
-                  <span>Vollständiger Name *</span>
+                  <span>Vollständiger Name</span>
+                  <span className="text-red-400 font-bold">*</span>
                 </Label>
                 <Input
                   id="name"
@@ -248,7 +249,8 @@ const GeneralInfo = ({ data, updateData }) => {
                   <div className="bg-gradient-to-r from-blue-500 to-cyan-600 p-1 rounded-lg">
                     <Mail className="h-3 w-3 text-white" />
                   </div>
-                  <span>E-Mail-Adresse *</span>
+                  <span>E-Mail-Adresse</span>
+                  <span className="text-red-400 font-bold">*</span>
                 </Label>
                 <Input
                   id="email"
@@ -274,7 +276,8 @@ const GeneralInfo = ({ data, updateData }) => {
                   <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-1 rounded-lg">
                     <Phone className="h-3 w-3 text-white" />
                   </div>
-                  <span>Telefonnummer *</span>
+                  <span>Telefonnummer</span>
+                  <span className="text-red-400 font-bold">*</span>
                 </Label>
                 <Input
                   id="phone"

@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, AlertCircle, RefreshCw, Sparkles, Zap, Heart, ArrowRight } from 'lucide-react';
+import { ChevronLeft, Sparkles, Zap, Heart, ArrowRight } from 'lucide-react';
 import ServiceSelection from './ServiceSelection';
 import GeneralInfo from './GeneralInfo';
 import MovingDetails from './MovingDetails';
@@ -10,8 +9,6 @@ import CleaningDetails from './CleaningDetails';
 import DeclutterDetails from './DeclutterDetails';
 import PriceSummary from './PriceSummary';
 import CalculatorStepper from './CalculatorStepper';
-import { calculatorApi, ApiError } from '@/lib/api';
-import { toast } from '@/components/ui/use-toast';
 
 const Calculator = () => {
     const [currentStep, setCurrentStep] = useState(0);
@@ -23,41 +20,8 @@ const Calculator = () => {
         declutterDetails: {},
         pricing: null
     });
-    const [isCalculatorEnabled, setIsCalculatorEnabled] = useState(true);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    // Instant calculator loading - no API calls on mount
-    useEffect(() => {
-        // Skip API call entirely for faster loading
-        setIsCalculatorEnabled(true);
-        setIsLoading(false);
-    }, []);
 
-    // Retry calculator availability check
-    const retryConnection = () => {
-        const checkCalculatorAvailability = async () => {
-            try {
-                setIsLoading(true);
-                setError(null);
-                const response = await calculatorApi.isCalculatorEnabled();
-                setIsCalculatorEnabled(response.enabled !== false);
-            } catch (err) {
-                console.error('Calculator availability check failed:', err);
-                setError(err);
-
-                toast({
-                    title: "Verbindungsfehler",
-                    description: err instanceof ApiError ? err.message : "Fehler beim Laden des Rechners",
-                    variant: "destructive",
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        checkCalculatorAvailability();
-    };
 
     const steps = [
         { id: 'service', title: 'Service wählen', component: ServiceSelection },
@@ -71,143 +35,94 @@ const Calculator = () => {
     // Filter steps based on selected services
     const activeSteps = steps.filter(step => !step.condition || step.condition());
 
-    const updateCalculatorData = (stepData, stepKey) => {
+    const updateCalculatorData = useCallback((stepData, stepKey) => {
         setCalculatorData(prev => ({
             ...prev,
             [stepKey]: stepData
         }));
-    };
+    }, []);
 
-    const nextStep = () => {
+    const nextStep = useCallback(() => {
         if (currentStep < activeSteps.length - 1) {
             setCurrentStep(currentStep + 1);
         }
-    };
+    }, [currentStep, activeSteps.length]);
 
-    const prevStep = () => {
+    const prevStep = useCallback(() => {
         if (currentStep > 0) {
             setCurrentStep(currentStep - 1);
         }
-    };
+    }, [currentStep]);
 
     const canProceed = () => {
         const currentStepData = activeSteps[currentStep];
+        if (!currentStepData) return false;
+        
         switch (currentStepData.id) {
             case 'service':
-                return calculatorData.selectedServices.length > 0;
+                return calculatorData.selectedServices && calculatorData.selectedServices.length > 0;
+            case 'moving':
+                return calculatorData.movingDetails.rooms && 
+                       calculatorData.movingDetails.fromAddress && 
+                       calculatorData.movingDetails.fromAddress.street &&
+                       calculatorData.movingDetails.toAddress && 
+                       calculatorData.movingDetails.toAddress.street;
+            case 'cleaning':
+                return calculatorData.cleaningDetails.objectType && 
+                       calculatorData.cleaningDetails.size &&
+                       calculatorData.cleaningDetails.cleaningIntensity;
+            case 'declutter':
+                return calculatorData.declutterDetails.objectType && 
+                       calculatorData.declutterDetails.size &&
+                       calculatorData.declutterDetails.address &&
+                       calculatorData.declutterDetails.address.street;
             case 'contact':
-                return calculatorData.generalInfo.name && calculatorData.generalInfo.email && calculatorData.generalInfo.phone;
+                return calculatorData.generalInfo.name && 
+                       calculatorData.generalInfo.email && 
+                       calculatorData.generalInfo.phone;
             default:
                 return true;
         }
     };
 
+    // Auto-progression with proper debouncing - DISABLED to prevent white screen
+    // TODO: Implement auto-progression without infinite loops
+    // useEffect(() => {
+    //     let timeoutId;
+        
+    //     if (canProceed() && currentStep < activeSteps.length - 1) {
+    //         timeoutId = setTimeout(() => {
+    //             setCurrentStep(prev => prev + 1);
+    //         }, 500);
+    //     }
+        
+    //     return () => {
+    //         if (timeoutId) {
+    //             clearTimeout(timeoutId);
+    //         }
+    //     };
+    // }, [calculatorData.selectedServices, calculatorData.movingDetails, calculatorData.cleaningDetails, calculatorData.declutterDetails, calculatorData.generalInfo]);
+
     const CurrentStepComponent = activeSteps[currentStep]?.component;
 
-    // Beautiful loading state with micro-animations
-    if (isLoading) {
+    // Safety check to prevent white screen
+    if (!CurrentStepComponent) {
+        console.error('No component found for current step:', currentStep, activeSteps);
         return (
             <div className="max-w-4xl mx-auto p-3 sm:p-6">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-violet-500/20 overflow-hidden"
-                >
-                    <div className="relative p-6 sm:p-8">
-                        {/* Animated background gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-purple-600/10 to-pink-600/10 animate-pulse"></div>
-
-                        <div className="relative text-center py-8 sm:py-12">
-                            {/* Beautiful loading animation */}
-                            <motion.div
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                className="relative mx-auto mb-6"
-                            >
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-violet-500/30 border-t-violet-500 mx-auto"></div>
-                                <motion.div
-                                    animate={{ scale: [1, 1.2, 1] }}
-                                    transition={{ duration: 1.5, repeat: Infinity }}
-                                    className="absolute inset-0 flex items-center justify-center"
-                                >
-                                    <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-violet-400" />
-                                </motion.div>
-                            </motion.div>
-
-                            <motion.h3
-                                animate={{ opacity: [0.5, 1, 0.5] }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                                className="text-xl sm:text-2xl font-bold text-white mb-2"
-                            >
-                                Rechner wird geladen...
-                            </motion.h3>
-                            <p className="text-sm sm:text-base text-violet-200/80">
-                                Einen Moment bitte, wir bereiten alles für Sie vor
-                            </p>
-                        </div>
+                <div className="bg-gradient-to-br from-gray-800/95 to-gray-900/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-violet-500/20 overflow-hidden p-8">
+                    <div className="text-center py-8">
+                        <Sparkles className="w-12 h-12 text-violet-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold text-white mb-2">Rechner wird geladen...</h3>
+                        <p className="text-violet-200/80">Einen Moment bitte</p>
+                        <Button 
+                            onClick={() => setCurrentStep(0)} 
+                            className="mt-4 bg-violet-600 hover:bg-violet-700"
+                        >
+                            Neu starten
+                        </Button>
                     </div>
-                </motion.div>
-            </div>
-        );
-    }
-
-    // Error state
-    if (error && !isCalculatorEnabled) {
-        return (
-            <div className="max-w-4xl mx-auto p-6">
-                <Card className="shadow-2xl border-0">
-                    <CardContent className="p-8">
-                        <div className="text-center py-12">
-                            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                Rechner nicht verfügbar
-                            </h3>
-                            <p className="text-gray-600 mb-6">
-                                {error instanceof ApiError ? error.message : 'Der Kostenrechner ist momentan nicht verfügbar.'}
-                            </p>
-                            <div className="space-y-4">
-                                <Button
-                                    onClick={retryConnection}
-                                    className="inline-flex items-center space-x-2 bg-violet-600 hover:bg-violet-700"
-                                >
-                                    <RefreshCw className="h-4 w-4" />
-                                    <span>Erneut versuchen</span>
-                                </Button>
-                                <div className="text-sm text-gray-500">
-                                    <p>Alternativ können Sie uns direkt kontaktieren:</p>
-                                    <p className="font-medium">Telefon: +49 1575 0693353</p>
-                                    <p className="font-medium">E-Mail: info@yla-umzug.de</p>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        );
-    }
-
-    // Calculator disabled state
-    if (!isCalculatorEnabled) {
-        return (
-            <div className="max-w-4xl mx-auto p-6">
-                <Card className="shadow-2xl border-0">
-                    <CardContent className="p-8">
-                        <div className="text-center py-12">
-                            <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                Rechner temporär deaktiviert
-                            </h3>
-                            <p className="text-gray-600 mb-6">
-                                Der Kostenrechner ist momentan deaktiviert. Bitte kontaktieren Sie uns direkt für ein Angebot.
-                            </p>
-                            <div className="space-y-2 text-sm text-gray-600">
-                                <p className="font-medium">Kontaktieren Sie uns:</p>
-                                <p>Telefon: +49 1575 0693353</p>
-                                <p>E-Mail: info@yla-umzug.de</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                </div>
             </div>
         );
     }
@@ -285,13 +200,34 @@ const Calculator = () => {
                             }}
                             className="min-h-[300px] sm:min-h-[400px]"
                         >
-                            {CurrentStepComponent && (
-                                <CurrentStepComponent
-                                    data={calculatorData}
-                                    updateData={updateCalculatorData}
-                                    onNext={nextStep}
-                                />
-                            )}
+                            {(() => {
+                                try {
+                                    return CurrentStepComponent ? (
+                                        <CurrentStepComponent
+                                            data={calculatorData}
+                                            updateData={updateCalculatorData}
+                                            onNext={nextStep}
+                                        />
+                                    ) : (
+                                        <div className="text-center py-8">
+                                            <p className="text-white">Schritt wird geladen...</p>
+                                        </div>
+                                    );
+                                } catch (error) {
+                                    console.error('Error rendering step component:', error);
+                                    return (
+                                        <div className="text-center py-8">
+                                            <p className="text-red-400">Fehler beim Laden des Schritts</p>
+                                            <Button 
+                                                onClick={() => setCurrentStep(0)} 
+                                                className="mt-4 bg-violet-600 hover:bg-violet-700"
+                                            >
+                                                Neu starten
+                                            </Button>
+                                        </div>
+                                    );
+                                }
+                            })()}
                         </motion.div>
                     </AnimatePresence>
 
