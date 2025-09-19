@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Cache;
 class Setting extends Model
 {
     protected $fillable = [
-        'key',
+        'group_name',
+        'key_name',
         'value',
         'type',
-        'group',
         'description',
         'is_public'
     ];
@@ -25,33 +25,55 @@ class Setting extends Model
      */
     public static function getValue(string $key, mixed $default = null): mixed
     {
-        $cacheKey = "setting.{$key}";
+        $cacheService = app(\App\Services\CacheService::class);
         
-        return Cache::remember($cacheKey, 3600, function () use ($key, $default) {
-            $setting = static::where('key', $key)->first();
-            
-            if (!$setting) {
-                return $default;
-            }
+        return $cacheService->remember(
+            $key,
+            function () use ($key, $default) {
+                // Support both group.key and key formats
+                if (str_contains($key, '.')) {
+                    [$group, $keyName] = explode('.', $key, 2);
+                    $setting = static::where('group_name', $group)
+                        ->where('key_name', $keyName)
+                        ->first();
+                } else {
+                    $setting = static::where('key_name', $key)->first();
+                }
+                
+                if (!$setting) {
+                    return $default;
+                }
 
-            return static::castValue($setting->value, $setting->type);
-        });
+                return static::castValue($setting->value, $setting->type);
+            },
+            null,
+            'settings'
+        );
     }
 
     /**
      * Set a setting value and clear cache
      */
-    public static function setValue(string $key, mixed $value, string $type = 'string'): void
+    public static function setValue(string $key, mixed $value, string $type = 'string', string $group = 'general'): void
     {
+        if (str_contains($key, '.')) {
+            [$group, $keyName] = explode('.', $key, 2);
+        } else {
+            $keyName = $key;
+        }
+
         static::updateOrCreate(
-            ['key' => $key],
+            ['group_name' => $group, 'key_name' => $keyName],
             [
                 'value' => static::prepareValue($value, $type),
                 'type' => $type
             ]
         );
 
-        Cache::forget("setting.{$key}");
+        // Clear cache using the cache service
+        $cacheService = app(\App\Services\CacheService::class);
+        $cacheService->forget($key, 'settings');
+        $cacheService->forget("group.{$group}", 'settings');
     }
 
     /**
@@ -94,14 +116,38 @@ class Setting extends Model
     }
 
     /**
-     * Get settings by group
+     * Get settings by group with caching
      */
     public static function getByGroup(string $group): array
     {
-        return static::where('group', $group)
-            ->get()
-            ->mapWithKeys(function ($setting) {
-                return [$setting->key => static::castValue($setting->value, $setting->type)];
+        $cacheService = app(\App\Services\CacheService::class);
+        
+        return $cacheService->cacheSettings($group, function () use ($group) {
+            return static::where('group_name', $group)
+                ->get()
+                ->mapWithKeys(function ($setting) {
+                    return [$setting->key_name => static::castValue($setting->value, $setting->type)];
+                })
+                ->toArray();
+        });
+    }
+
+    /**
+     * Get all settings grouped by group name
+     */
+    public static function getAllGrouped(): array
+    {
+        return static::all()
+            ->groupBy('group_name')
+            ->map(function ($settings) {
+                return $settings->mapWithKeys(function ($setting) {
+                    return [$setting->key_name => [
+                        'value' => static::castValue($setting->value, $setting->type),
+                        'type' => $setting->type,
+                        'description' => $setting->description,
+                        'is_public' => $setting->is_public
+                    ]];
+                });
             })
             ->toArray();
     }

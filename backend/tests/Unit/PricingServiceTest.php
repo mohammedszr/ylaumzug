@@ -2,12 +2,13 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 use App\Services\PricingService;
 use App\Services\Calculators\MovingPriceCalculator;
 use App\Services\Calculators\CleaningPriceCalculator;
 use App\Services\Calculators\DeclutterPriceCalculator;
 use App\Services\Calculators\DiscountCalculator;
+use App\Services\OpenRouteServiceCalculator;
 use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -20,10 +21,12 @@ class PricingServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->createApplication();
+        
+        $distanceCalculator = new OpenRouteServiceCalculator();
         
         $this->pricingService = new PricingService(
-            new MovingPriceCalculator(),
+            $distanceCalculator,
+            new MovingPriceCalculator($distanceCalculator),
             new CleaningPriceCalculator(),
             new DeclutterPriceCalculator(),
             new DiscountCalculator()

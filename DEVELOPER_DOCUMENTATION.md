@@ -20,7 +20,7 @@ Umzugs und Hausleistungen Rechner YLA Umzug is a German moving services website 
 
 - **Multi-Service Calculator**: Calculate costs for Umzug (moving), Putzservice (cleaning), and Entrümpelung (decluttering)
 - **Quote Management**: Submit and manage customer quote requests
-- **Admin Panel**: Manage pricing, services, and content through Payload CMS
+- **Admin Panel**: Manage pricing, services, and content through Filament Admin Panel
 - **Mobile-First Design**: Responsive design optimized for mobile devices
 - **German Localization**: All content and UI in German
 
@@ -39,8 +39,8 @@ Umzugs und Hausleistungen Rechner YLA Umzug is a German moving services website 
 - Laravel Sanctum for API authentication
 
 **Content Management:**
-- Payload CMS with MongoDB
-- Admin interface for content management
+- Filament Admin Panel with SQLite/MySQL
+- Professional admin interface for quote and settings management
 
 **Infrastructure:**
 - Docker & Docker Compose
@@ -52,10 +52,12 @@ Umzugs und Hausleistungen Rechner YLA Umzug is a German moving services website 
 ### System Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React Frontend │    │  Laravel Backend │    │   Payload CMS   │
-│   (Port 3000)   │◄──►│   (Port 8000)   │◄──►│   (Port 3001)   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌─────────────────┐
+│   React Frontend │    │  Laravel Backend │
+│   (Port 3000)   │◄──►│   (Port 8000)   │
+└─────────────────┘    └─────────────────┘
+                       │   Filament Admin │
+                       │   (Port 8000)    │
          │                       │                       │
          │                       │                       │
          ▼                       ▼                       ▼
@@ -70,9 +72,9 @@ Umzugs und Hausleistungen Rechner YLA Umzug is a German moving services website 
 1. **User Interaction**: User interacts with React frontend
 2. **API Calls**: Frontend makes API calls to Laravel backend
 3. **Business Logic**: Laravel processes requests and calculates pricing
-4. **Database Operations**: Data stored in MySQL (quotes) and MongoDB (content)
-5. **Email Notifications**: Laravel sends emails for quote requests
-6. **Admin Management**: Content managed through Payload CMS
+4. **Database Operations**: Data stored in SQLite/MySQL (quotes, settings, users)
+5. **Email Notifications**: Laravel sends emails for quote requests with queue support
+6. **Admin Management**: Quote and settings management through Filament Admin Panel
 
 ## 🚀 Development Setup
 

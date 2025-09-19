@@ -273,6 +273,103 @@ class PdfQuoteService
     }
 
     /**
+     * Check if PDF exists for quote
+     */
+    public function pdfExists(QuoteRequest $quote): bool
+    {
+        $filename = $this->generatePdfFilename($quote);
+        return Storage::disk('local')->exists("quotes/{$filename}");
+    }
+
+    /**
+     * Get PDF file path for quote
+     */
+    public function getPdfPath(QuoteRequest $quote): ?string
+    {
+        $filename = $this->generatePdfFilename($quote);
+        $path = "quotes/{$filename}";
+        
+        return Storage::disk('local')->exists($path) ? $path : null;
+    }
+
+    /**
+     * Get PDF file size
+     */
+    public function getPdfSize(QuoteRequest $quote): ?int
+    {
+        $path = $this->getPdfPath($quote);
+        
+        return $path ? Storage::disk('local')->size($path) : null;
+    }
+
+    /**
+     * Delete PDF file for quote
+     */
+    public function deletePdf(QuoteRequest $quote): bool
+    {
+        try {
+            $path = $this->getPdfPath($quote);
+            
+            if ($path) {
+                Storage::disk('local')->delete($path);
+                
+                Log::info('PDF deleted', [
+                    'quote_id' => $quote->id,
+                    'filename' => basename($path)
+                ]);
+                
+                return true;
+            }
+            
+            return false;
+
+        } catch (\Exception $e) {
+            Log::error('PDF deletion failed', [
+                'quote_id' => $quote->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return false;
+        }
+    }
+
+    /**
+     * Get PDF storage statistics
+     */
+    public function getStorageStats(): array
+    {
+        try {
+            $files = Storage::disk('local')->files('quotes');
+            $totalSize = 0;
+            $fileCount = count($files);
+            
+            foreach ($files as $file) {
+                $totalSize += Storage::disk('local')->size($file);
+            }
+            
+            return [
+                'file_count' => $fileCount,
+                'total_size_bytes' => $totalSize,
+                'total_size_mb' => round($totalSize / 1024 / 1024, 2),
+                'average_size_kb' => $fileCount > 0 ? round($totalSize / $fileCount / 1024, 2) : 0
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('PDF storage stats failed', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'file_count' => 0,
+                'total_size_bytes' => 0,
+                'total_size_mb' => 0,
+                'average_size_kb' => 0,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
      * Clean up old PDF files (optional maintenance method)
      */
     public function cleanupOldPdfs(int $daysOld = 90): int

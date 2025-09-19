@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\DistanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // API Routes for settings
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/settings', [SettingsController::class, 'apiIndex'])->name('settings.index');
+        Route::post('/quotes/{quote}/calculate-distance', [DistanceController::class, 'calculateForQuote'])->name('quotes.calculate-distance');
     });
     
     // Dashboard redirect

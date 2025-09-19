@@ -14,404 +14,461 @@ class SettingsSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            // Calculator Control
+            // General Settings
             [
-                'key' => 'calculator_enabled',
+                'group_name' => 'general',
+                'key_name' => 'calculator_enabled',
                 'value' => '1',
                 'type' => 'boolean',
-                'group' => 'calculator',
                 'description' => 'Enable or disable the pricing calculator',
                 'is_public' => true
             ],
-            
-            // Business Information
             [
-                'key' => 'business_email',
+                'group_name' => 'general',
+                'key_name' => 'business_email',
                 'value' => 'info@yla-umzug.de',
                 'type' => 'string',
-                'group' => 'business',
                 'description' => 'Main business email address',
                 'is_public' => false
             ],
             [
-                'key' => 'business_phone',
+                'group_name' => 'general',
+                'key_name' => 'business_phone',
                 'value' => '+49 1575 0693353',
                 'type' => 'string',
-                'group' => 'business',
                 'description' => 'Business phone number',
                 'is_public' => true
             ],
-            
-            // Service Areas
             [
-                'key' => 'service_areas',
+                'group_name' => 'general',
+                'key_name' => 'service_areas',
                 'value' => '["66111", "66112", "66113", "67655", "67656", "54290", "54292"]',
                 'type' => 'json',
-                'group' => 'business',
                 'description' => 'Postal codes served',
                 'is_public' => false
             ],
             [
-                'key' => 'max_service_distance',
+                'group_name' => 'general',
+                'key_name' => 'max_service_distance',
                 'value' => '100',
                 'type' => 'integer',
-                'group' => 'business',
                 'description' => 'Maximum service distance in km',
                 'is_public' => false
             ],
-            
-            // Moving Service Pricing
+
+            // Pricing Settings
             [
-                'key' => 'base_price_per_sqm',
-                'value' => '8.0',
-                'type' => 'decimal',
-                'group' => 'moving',
-                'description' => 'Base price per square meter for moving',
-                'is_public' => false
-            ],
-            [
-                'key' => 'distance_rate',
-                'value' => '2.0',
-                'type' => 'decimal',
-                'group' => 'moving',
-                'description' => 'Price per kilometer distance',
-                'is_public' => false
-            ],
-            [
-                'key' => 'box_handling_rate',
-                'value' => '3.0',
-                'type' => 'decimal',
-                'group' => 'moving',
-                'description' => 'Price per moving box',
-                'is_public' => false
-            ],
-            [
-                'key' => 'floor_surcharge',
-                'value' => '50.0',
-                'type' => 'decimal',
-                'group' => 'moving',
-                'description' => 'Surcharge per floor above 2nd (no elevator)',
-                'is_public' => false
-            ],
-            [
-                'key' => 'minimum_moving_cost',
-                'value' => '300',
-                'type' => 'decimal',
-                'group' => 'moving',
-                'description' => 'Minimum cost for moving service',
-                'is_public' => false
-            ],
-            
-            // Moving Additional Services
-            [
-                'key' => 'furniture_assembly_cost',
-                'value' => '200.0',
-                'type' => 'decimal',
-                'group' => 'moving',
-                'description' => 'Cost for furniture assembly/disassembly',
-                'is_public' => false
-            ],
-            [
-                'key' => 'packing_service_cost',
-                'value' => '150.0',
-                'type' => 'decimal',
-                'group' => 'moving',
-                'description' => 'Cost for packing service',
-                'is_public' => false
-            ],
-            [
-                'key' => 'parking_permit_cost',
-                'value' => '80.0',
-                'type' => 'decimal',
-                'group' => 'moving',
-                'description' => 'Cost for parking permit arrangement',
-                'is_public' => false
-            ],
-            [
-                'key' => 'storage_service_cost',
-                'value' => '100.0',
-                'type' => 'decimal',
-                'group' => 'moving',
-                'description' => 'Cost for storage service per m²',
-                'is_public' => false
-            ],
-            [
-                'key' => 'disposal_service_cost',
-                'value' => '120.0',
-                'type' => 'decimal',
-                'group' => 'moving',
-                'description' => 'Cost for disposal service',
-                'is_public' => false
-            ],
-            
-            // Decluttering Service Pricing
-            [
-                'key' => 'declutter_volume_low',
-                'value' => '300',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Price for low volume decluttering (1-2 containers)',
-                'is_public' => false
-            ],
-            [
-                'key' => 'declutter_volume_medium',
-                'value' => '600',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Price for medium volume decluttering (3-5 containers)',
-                'is_public' => false
-            ],
-            [
-                'key' => 'declutter_volume_high',
-                'value' => '1200',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Price for high volume decluttering (6+ containers)',
-                'is_public' => false
-            ],
-            [
-                'key' => 'declutter_volume_extreme',
-                'value' => '2000',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Price for extreme volume decluttering (hoarding)',
-                'is_public' => false
-            ],
-            [
-                'key' => 'minimum_declutter_cost',
-                'value' => '300',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Minimum cost for decluttering service',
-                'is_public' => false
-            ],
-            
-            // Decluttering Surcharges
-            [
-                'key' => 'hazardous_waste_surcharge',
-                'value' => '150.0',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Surcharge for hazardous waste disposal',
-                'is_public' => false
-            ],
-            [
-                'key' => 'electronics_disposal_cost',
-                'value' => '100.0',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Cost for electronics disposal',
-                'is_public' => false
-            ],
-            [
-                'key' => 'construction_waste_cost',
-                'value' => '200.0',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Cost for construction waste disposal',
-                'is_public' => false
-            ],
-            [
-                'key' => 'furniture_disposal_cost',
-                'value' => '80.0',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Cost for furniture disposal',
-                'is_public' => false
-            ],
-            [
-                'key' => 'declutter_floor_rate',
-                'value' => '30.0',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Floor surcharge rate for decluttering',
-                'is_public' => false
-            ],
-            [
-                'key' => 'access_difficulty_surcharge',
-                'value' => '100.0',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Surcharge for difficult access',
-                'is_public' => false
-            ],
-            [
-                'key' => 'clean_handover_cost',
-                'value' => '150.0',
-                'type' => 'decimal',
-                'group' => 'decluttering',
-                'description' => 'Cost for clean handover service',
-                'is_public' => false
-            ],
-            
-            // Cleaning Service Pricing
-            [
-                'key' => 'cleaning_rate_normal',
-                'value' => '3.0',
-                'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Rate per m² for normal cleaning',
-                'is_public' => false
-            ],
-            [
-                'key' => 'cleaning_rate_deep',
-                'value' => '5.0',
-                'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Rate per m² for deep cleaning',
-                'is_public' => false
-            ],
-            [
-                'key' => 'cleaning_rate_construction',
-                'value' => '7.0',
-                'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Rate per m² for construction cleaning',
-                'is_public' => false
-            ],
-            [
-                'key' => 'cleaning_rate_moveout',
-                'value' => '6.0',
-                'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Rate per m² for move-out cleaning',
-                'is_public' => false
-            ],
-            [
-                'key' => 'minimum_cleaning_cost',
+                'group_name' => 'pricing',
+                'key_name' => 'minimum_order_value',
                 'value' => '150',
                 'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Minimum cost for cleaning service',
+                'description' => 'Minimum order value for any service',
                 'is_public' => false
             ],
             
-            // Cleaning Room Surcharges
+            // Umzug Pricing
             [
-                'key' => 'window_cleaning_rate',
-                'value' => '2.0',
+                'group_name' => 'pricing',
+                'key_name' => 'umzug.base_price',
+                'value' => '150',
                 'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Rate per m² for window cleaning',
+                'description' => 'Base price for moving service',
                 'is_public' => false
             ],
             [
-                'key' => 'kitchen_deep_clean_cost',
-                'value' => '80.0',
+                'group_name' => 'pricing',
+                'key_name' => 'umzug.price_per_room',
+                'value' => '50',
                 'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Fixed cost for deep kitchen cleaning',
+                'description' => 'Price per room for moving',
                 'is_public' => false
             ],
             [
-                'key' => 'bathroom_deep_clean_cost',
-                'value' => '60.0',
+                'group_name' => 'pricing',
+                'key_name' => 'umzug.floor_surcharge',
+                'value' => '25',
                 'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Fixed cost for deep bathroom cleaning',
+                'description' => 'Surcharge per floor above 2nd',
                 'is_public' => false
             ],
             [
-                'key' => 'balcony_clean_cost',
-                'value' => '40.0',
-                'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Fixed cost for balcony cleaning',
+                'group_name' => 'pricing',
+                'key_name' => 'umzug.free_distance_km',
+                'value' => '30',
+                'type' => 'integer',
+                'description' => 'Free distance in km',
                 'is_public' => false
             ],
             [
-                'key' => 'basement_clean_cost',
-                'value' => '50.0',
+                'group_name' => 'pricing',
+                'key_name' => 'umzug.price_per_km',
+                'value' => '1.5',
                 'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Fixed cost for basement cleaning',
+                'description' => 'Price per km after free distance',
                 'is_public' => false
             ],
             
-            // Cleaning Frequency Discounts
+            // Putzservice Pricing
             [
-                'key' => 'frequency_discount_weekly',
-                'value' => '0.20',
+                'group_name' => 'pricing',
+                'key_name' => 'putzservice.base_price',
+                'value' => '80',
                 'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Discount rate for weekly cleaning (20%)',
+                'description' => 'Base price for cleaning service',
                 'is_public' => false
             ],
             [
-                'key' => 'frequency_discount_biweekly',
-                'value' => '0.15',
+                'group_name' => 'pricing',
+                'key_name' => 'putzservice.price_per_room',
+                'value' => '30',
                 'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Discount rate for bi-weekly cleaning (15%)',
+                'description' => 'Price per room for cleaning',
                 'is_public' => false
             ],
             [
-                'key' => 'frequency_discount_monthly',
+                'group_name' => 'pricing',
+                'key_name' => 'putzservice.deep_cleaning_surcharge',
+                'value' => '50',
+                'type' => 'decimal',
+                'description' => 'Surcharge for deep cleaning',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'pricing',
+                'key_name' => 'putzservice.construction_cleaning_surcharge',
+                'value' => '100',
+                'type' => 'decimal',
+                'description' => 'Surcharge for construction cleaning',
+                'is_public' => false
+            ],
+            
+            // Entrümpelung Pricing
+            [
+                'group_name' => 'pricing',
+                'key_name' => 'entruempelung.base_price',
+                'value' => '120',
+                'type' => 'decimal',
+                'description' => 'Base price for decluttering service',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'pricing',
+                'key_name' => 'entruempelung.price_per_volume',
+                'value' => '40',
+                'type' => 'decimal',
+                'description' => 'Price per volume unit',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'pricing',
+                'key_name' => 'entruempelung.house_surcharge',
+                'value' => '100',
+                'type' => 'decimal',
+                'description' => 'Surcharge for house decluttering',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'pricing',
+                'key_name' => 'entruempelung.basement_surcharge',
+                'value' => '50',
+                'type' => 'decimal',
+                'description' => 'Surcharge for basement decluttering',
+                'is_public' => false
+            ],
+            
+            // Discount Settings
+            [
+                'group_name' => 'pricing',
+                'key_name' => 'discounts.two_services',
+                'value' => '10',
+                'type' => 'integer',
+                'description' => 'Discount percentage for 2 services',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'pricing',
+                'key_name' => 'discounts.three_plus_services',
+                'value' => '15',
+                'type' => 'integer',
+                'description' => 'Discount percentage for 3+ services',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'pricing',
+                'key_name' => 'surcharges.express',
+                'value' => '20',
+                'type' => 'integer',
+                'description' => 'Express surcharge percentage',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'pricing',
+                'key_name' => 'combination_discount_2_services',
                 'value' => '0.10',
                 'type' => 'decimal',
-                'group' => 'cleaning',
-                'description' => 'Discount rate for monthly cleaning (10%)',
-                'is_public' => false
-            ],
-            
-            // Combination Discounts
-            [
-                'key' => 'combination_discount_2_services',
-                'value' => '0.10',
-                'type' => 'decimal',
-                'group' => 'discounts',
                 'description' => 'Discount rate for 2 services (10%)',
                 'is_public' => false
             ],
             [
-                'key' => 'combination_discount_3_services',
+                'group_name' => 'pricing',
+                'key_name' => 'combination_discount_3_services',
                 'value' => '0.15',
                 'type' => 'decimal',
-                'group' => 'discounts',
                 'description' => 'Discount rate for 3+ services (15%)',
                 'is_public' => false
             ],
             [
-                'key' => 'moving_cleaning_bonus',
-                'value' => '50.0',
-                'type' => 'decimal',
-                'group' => 'discounts',
-                'description' => 'Extra bonus for moving + cleaning combination',
-                'is_public' => false
-            ],
-            [
-                'key' => 'declutter_cleaning_bonus',
-                'value' => '75.0',
-                'type' => 'decimal',
-                'group' => 'discounts',
-                'description' => 'Extra bonus for decluttering + cleaning combination',
-                'is_public' => false
-            ],
-            
-            // Express Surcharge
-            [
-                'key' => 'express_surcharge',
+                'group_name' => 'pricing',
+                'key_name' => 'express_surcharge',
                 'value' => '0.20',
                 'type' => 'decimal',
-                'group' => 'surcharges',
                 'description' => 'Surcharge rate for express service (20%)',
                 'is_public' => false
             ],
-            
-            // Minimum Order Values
+
+            // Moving Service Settings
             [
-                'key' => 'minimum_order_value',
-                'value' => '150',
+                'group_name' => 'moving',
+                'key_name' => 'base_price_per_sqm',
+                'value' => '8.0',
                 'type' => 'decimal',
-                'group' => 'pricing',
-                'description' => 'Minimum order value for any service',
+                'description' => 'Base price per square meter for moving',
                 'is_public' => false
             ],
+            [
+                'group_name' => 'moving',
+                'key_name' => 'distance_rate',
+                'value' => '2.0',
+                'type' => 'decimal',
+                'description' => 'Price per kilometer distance',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'moving',
+                'key_name' => 'minimum_distance_free',
+                'value' => '30',
+                'type' => 'integer',
+                'description' => 'Free distance in km before charges apply',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'moving',
+                'key_name' => 'floor_surcharge',
+                'value' => '50.0',
+                'type' => 'decimal',
+                'description' => 'Surcharge per floor above 2nd (no elevator)',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'moving',
+                'key_name' => 'minimum_moving_cost',
+                'value' => '300',
+                'type' => 'decimal',
+                'description' => 'Minimum cost for moving service',
+                'is_public' => false
+            ],
+
+            // Cleaning Service Settings
+            [
+                'group_name' => 'cleaning',
+                'key_name' => 'cleaning_rate_normal',
+                'value' => '3.0',
+                'type' => 'decimal',
+                'description' => 'Rate per m² for normal cleaning',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'cleaning',
+                'key_name' => 'cleaning_rate_deep',
+                'value' => '5.0',
+                'type' => 'decimal',
+                'description' => 'Rate per m² for deep cleaning',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'cleaning',
+                'key_name' => 'cleaning_rate_construction',
+                'value' => '7.0',
+                'type' => 'decimal',
+                'description' => 'Rate per m² for construction cleaning',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'cleaning',
+                'key_name' => 'minimum_cleaning_cost',
+                'value' => '150',
+                'type' => 'decimal',
+                'description' => 'Minimum cost for cleaning service',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'cleaning',
+                'key_name' => 'frequency_discount_weekly',
+                'value' => '0.20',
+                'type' => 'decimal',
+                'description' => 'Discount rate for weekly cleaning (20%)',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'cleaning',
+                'key_name' => 'frequency_discount_biweekly',
+                'value' => '0.15',
+                'type' => 'decimal',
+                'description' => 'Discount rate for bi-weekly cleaning (15%)',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'cleaning',
+                'key_name' => 'frequency_discount_monthly',
+                'value' => '0.10',
+                'type' => 'decimal',
+                'description' => 'Discount rate for monthly cleaning (10%)',
+                'is_public' => false
+            ],
+
+            // Decluttering Service Settings
+            [
+                'group_name' => 'decluttering',
+                'key_name' => 'declutter_volume_low',
+                'value' => '300',
+                'type' => 'decimal',
+                'description' => 'Price for low volume decluttering (1-2 containers)',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'decluttering',
+                'key_name' => 'declutter_volume_medium',
+                'value' => '600',
+                'type' => 'decimal',
+                'description' => 'Price for medium volume decluttering (3-5 containers)',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'decluttering',
+                'key_name' => 'declutter_volume_high',
+                'value' => '1200',
+                'type' => 'decimal',
+                'description' => 'Price for high volume decluttering (6+ containers)',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'decluttering',
+                'key_name' => 'declutter_volume_extreme',
+                'value' => '2000',
+                'type' => 'decimal',
+                'description' => 'Price for extreme volume decluttering (hoarding)',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'decluttering',
+                'key_name' => 'hazardous_waste_surcharge',
+                'value' => '150.0',
+                'type' => 'decimal',
+                'description' => 'Surcharge for hazardous waste disposal',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'decluttering',
+                'key_name' => 'electronics_disposal_cost',
+                'value' => '100.0',
+                'type' => 'decimal',
+                'description' => 'Cost for electronics disposal',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'decluttering',
+                'key_name' => 'clean_handover_cost',
+                'value' => '150.0',
+                'type' => 'decimal',
+                'description' => 'Cost for clean handover service',
+                'is_public' => false
+            ],
+
+            // Email Settings
+            [
+                'group_name' => 'email',
+                'key_name' => 'from_address',
+                'value' => 'noreply@yla-umzug.de',
+                'type' => 'string',
+                'description' => 'Default from email address',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'email',
+                'key_name' => 'from_name',
+                'value' => 'YLA Umzug',
+                'type' => 'string',
+                'description' => 'Default from name',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'email',
+                'key_name' => 'response_time',
+                'value' => '24 Stunden',
+                'type' => 'string',
+                'description' => 'Expected response time for quotes',
+                'is_public' => true
+            ],
+
+            // API Settings
+            [
+                'group_name' => 'api',
+                'key_name' => 'openroute_api_key',
+                'value' => '',
+                'type' => 'string',
+                'description' => 'OpenRouteService API key for distance calculation',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'api',
+                'key_name' => 'whatsapp_access_token',
+                'value' => '',
+                'type' => 'string',
+                'description' => 'WhatsApp Business API access token',
+                'is_public' => false
+            ],
+            [
+                'group_name' => 'api',
+                'key_name' => 'whatsapp_phone_number_id',
+                'value' => '',
+                'type' => 'string',
+                'description' => 'WhatsApp Business phone number ID',
+                'is_public' => false
+            ],
+
+            // UI Settings
+            [
+                'group_name' => 'ui',
+                'key_name' => 'company_name',
+                'value' => 'YLA Umzug',
+                'type' => 'string',
+                'description' => 'Company name for display',
+                'is_public' => true
+            ],
+            [
+                'group_name' => 'ui',
+                'key_name' => 'company_address',
+                'value' => 'Musterstraße 123, 66111 Saarbrücken',
+                'type' => 'string',
+                'description' => 'Company address for display',
+                'is_public' => true
+            ],
+            [
+                'group_name' => 'ui',
+                'key_name' => 'show_pricing_disclaimer',
+                'value' => '1',
+                'type' => 'boolean',
+                'description' => 'Show pricing disclaimer on calculator',
+                'is_public' => true
+            ]
         ];
 
         foreach ($settings as $setting) {
             Setting::updateOrCreate(
-                ['key' => $setting['key']],
+                [
+                    'group_name' => $setting['group_name'],
+                    'key_name' => $setting['key_name']
+                ],
                 $setting
             );
         }

@@ -11,58 +11,85 @@ class Service extends Model
     use HasFactory;
 
     protected $fillable = [
-        'key',
         'name',
+        'slug',
         'description',
         'base_price',
+        'price_per_unit',
+        'unit_type',
         'is_active',
-        'configuration',
-        'sort_order'
+        'sort_order',
+        'pricing_config'
     ];
 
     protected $casts = [
         'base_price' => 'decimal:2',
+        'price_per_unit' => 'decimal:2',
         'is_active' => 'boolean',
-        'configuration' => 'array',
-        'sort_order' => 'integer'
+        'sort_order' => 'integer',
+        'pricing_config' => 'array'
     ];
 
     /**
-     * Get the pricing rules for this service
+     * Get quote requests that use this service
      */
-    public function pricingRules(): HasMany
+    public function quoteRequests()
     {
-        return $this->hasMany(PricingRule::class);
+        return $this->hasMany(QuoteRequest::class);
     }
 
     /**
-     * Get the additional services for this service
+     * Calculate price for this service based on details
      */
-    public function additionalServices(): HasMany
+    public function calculatePrice(array $details): float
     {
-        return $this->hasMany(AdditionalService::class);
+        $price = $this->base_price;
+        
+        if ($this->price_per_unit > 0 && isset($details['quantity'])) {
+            $price += $this->price_per_unit * $details['quantity'];
+        }
+        
+        // Apply pricing configuration rules
+        if ($this->pricing_config) {
+            $price = $this->applyPricingConfig($price, $details);
+        }
+        
+        return $price;
     }
 
     /**
-     * Get active pricing rules ordered by priority
+     * Apply pricing configuration rules
      */
-    public function getActivePricingRules()
+    private function applyPricingConfig(float $basePrice, array $details): float
     {
-        return $this->pricingRules()
-            ->where('is_active', true)
-            ->orderBy('priority', 'desc')
-            ->get();
+        $config = $this->pricing_config;
+        $price = $basePrice;
+        
+        // Room-based pricing
+        if (isset($config['room_multiplier']) && isset($details['rooms'])) {
+            $price *= (1 + ($config['room_multiplier'] * ($details['rooms'] - 1)));
+        }
+        
+        // Floor-based pricing
+        if (isset($config['floor_cost']) && isset($details['floors'])) {
+            $price += $config['floor_cost'] * $details['floors'];
+        }
+        
+        // Size-based pricing
+        if (isset($config['size_multipliers']) && isset($details['size'])) {
+            $multiplier = $config['size_multipliers'][$details['size']] ?? 1;
+            $price *= $multiplier;
+        }
+        
+        return $price;
     }
 
     /**
-     * Get active additional services ordered by sort order
+     * Check if service is available
      */
-    public function getActiveAdditionalServices()
+    public function isAvailable(): bool
     {
-        return $this->additionalServices()
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+        return $this->is_active;
     }
 
     /**
@@ -82,11 +109,11 @@ class Service extends Model
     }
 
     /**
-     * Get service by key
+     * Get service by slug
      */
-    public static function findByKey(string $key): ?self
+    public static function findBySlug(string $slug): ?self
     {
-        return static::where('key', $key)->first();
+        return static::where('slug', $slug)->first();
     }
 
     /**
@@ -99,21 +126,13 @@ class Service extends Model
             ->get()
             ->map(function ($service) {
                 return [
-                    'id' => $service->key,
+                    'id' => $service->slug,
                     'name' => $service->name,
                     'description' => $service->description,
                     'base_price' => $service->base_price,
-                    'additional_services' => $service->getActiveAdditionalServices()
-                        ->map(function ($addon) {
-                            return [
-                                'id' => $addon->key,
-                                'name' => $addon->name,
-                                'description' => $addon->description,
-                                'price' => $addon->price,
-                                'price_type' => $addon->price_type,
-                                'unit' => $addon->unit
-                            ];
-                        })->toArray()
+                    'price_per_unit' => $service->price_per_unit,
+                    'unit_type' => $service->unit_type,
+                    'pricing_config' => $service->pricing_config
                 ];
             })->toArray();
     }

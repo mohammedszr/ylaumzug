@@ -16,33 +16,33 @@ Transform the existing React-based YLA Umzug application into a full-stack Larav
 
 ## 📋 Implementation Checklist
 
-### Phase 1: Laravel Foundation & Database
-- [ ] Install Laravel 10 with proper project structure
-- [ ] Set up SQLite database for development/staging
-- [ ] Create comprehensive migration system
-- [ ] Implement advanced model relationships
-- [ ] Add proper validation and business logic
+### Phase 1: Laravel Foundation & Database ✅ COMPLETED
+- [x] Install Laravel 10 with proper project structure
+- [x] Set up SQLite database for development/staging
+- [x] Create comprehensive migration system
+- [x] Implement advanced model relationships
+- [x] Add proper validation and business logic
 
-### Phase 2: Filament Admin Dashboard
-- [ ] Install and configure Filament v3
-- [ ] Create advanced admin panel with German localization
-- [ ] Implement quote management system
-- [ ] Add settings management interface
-- [ ] Create user management and permissions
+### Phase 2: Filament Admin Dashboard ✅ COMPLETED
+- [x] Install and configure Filament v3
+- [x] Create advanced admin panel with German localization
+- [x] Implement quote management system
+- [x] Add settings management interface
+- [x] Create user management and permissions
 
-### Phase 3: API & Services Architecture
-- [ ] Build RESTful API for React frontend
-- [ ] Implement distance calculation services
-- [ ] Add email notification system
-- [ ] Create PDF generation capabilities
-- [ ] Integrate payment processing (future-ready)
+### Phase 3: API & Services Architecture ✅ COMPLETED
+- [x] Build RESTful API for React frontend
+- [x] Implement distance calculation services
+- [x] Add email notification system
+- [x] Create PDF generation capabilities
+- [x] Integrate payment processing (future-ready)
 
-### Phase 4: Production Features
-- [ ] Add comprehensive error handling
-- [ ] Implement logging and monitoring
-- [ ] Create backup and maintenance systems
-- [ ] Add security features and rate limiting
-- [ ] Configure deployment pipeline
+### Phase 4: Production Features ✅ COMPLETED
+- [x] Add comprehensive error handling
+- [x] Implement logging and monitoring
+- [x] Create backup and maintenance systems
+- [x] Add security features and rate limiting
+- [x] Configure deployment pipeline
 
 ---
 
@@ -977,6 +977,252 @@ class SettingResource extends Resource
 
 ---
 
+## � Frontende-Backend Integration (CRITICAL)
+
+### React Frontend API Integration
+
+The existing React frontend expects these **EXACT API endpoints** and data formats:
+
+#### 1. Calculator Availability Check
+```php
+<?php
+// routes/api.php
+Route::get('/calculator/status', [QuoteController::class, 'checkAvailability']);
+
+// Expected Response Format:
+{
+    "enabled": true,
+    "message": "Calculator available"
+}
+```
+
+#### 2. Price Calculation Endpoint
+```php
+// routes/api.php
+Route::post('/calculator/calculate', [QuoteController::class, 'calculatePrice']);
+
+// Expected Request Format (from React):
+{
+    "selectedServices": ["umzug", "putzservice"],
+    "generalInfo": {
+        "name": "Max Mustermann",
+        "email": "max@example.com",
+        "phone": "+49 1575 0693353",
+        "preferredDate": "2025-02-15",
+        "message": "Besondere Wünsche...",
+        "preferredContact": "email"
+    },
+    "movingDetails": {
+        "rooms": 3,
+        "floors": 2,
+        "fromAddress": "Musterstraße 1, 66123 Saarbrücken",
+        "toAddress": "Beispielweg 5, 66456 Homburg",
+        "fromPostalCode": "66123",
+        "toPostalCode": "66456"
+    },
+    "cleaningDetails": {
+        "rooms": 3,
+        "bathrooms": 2,
+        "deepCleaning": true
+    },
+    "declutterDetails": {
+        "volume": "large",
+        "items": ["furniture", "electronics"]
+    }
+}
+
+// Expected Response Format:
+{
+    "success": true,
+    "data": {
+        "total": 450.00,
+        "breakdown": {
+            "base_services": {
+                "umzug": 250.00,
+                "putzservice": 120.00
+            },
+            "distance_cost": 80.00,
+            "additional_fees": [],
+            "discounts": [],
+            "total": 450.00
+        }
+    }
+}
+```
+
+#### 3. Quote Submission Endpoint
+```php
+// routes/api.php
+Route::post('/quotes', [QuoteController::class, 'store']);
+
+// Expected Request Format (EXACT match with React form):
+{
+    "name": "Max Mustermann",
+    "email": "max@example.com",
+    "phone": "+49 1575 0693353",
+    "preferredDate": "2025-02-15",
+    "message": "Besondere Anforderungen...",
+    "preferredContact": "email",
+    "selectedServices": ["umzug"],
+    "movingDetails": {...},
+    "cleaningDetails": {...},
+    "declutterDetails": {...},
+    "pricing": {
+        "total": 450.00
+    },
+    "submittedAt": "2025-01-19T10:30:00.000Z",
+    "source": "calculator"
+}
+
+// Expected Response Format:
+{
+    "success": true,
+    "message": "Angebotsanfrage erfolgreich eingereicht",
+    "data": {
+        "angebotsnummer": "QR-2025-001",
+        "estimated_total": 450.00
+    }
+}
+```
+
+### Laravel Blade Template Integration
+
+The React app must be served through Laravel. Create this **EXACT** blade template:
+
+```php
+<?php
+// resources/views/app.blade.php
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ config('app.name', 'YLA Umzug') }}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <!-- Meta tags for SEO -->
+    <meta name="description" content="YLA Umzug - Professionelle Umzugs-, Reinigungs- und Entrümpelungsservices in Saarland & Rheinland-Pfalz">
+    <meta name="keywords" content="Umzug, Reinigung, Entrümpelung, Saarland, Rheinland-Pfalz">
+    
+    <!-- Vite Assets - CRITICAL: This loads the React app -->
+    @vite(['src/main.jsx'])
+</head>
+<body>
+    <!-- React App Mount Point -->
+    <div id="root"></div>
+    
+    <!-- Laravel Configuration for React -->
+    <script>
+        window.Laravel = {
+            csrfToken: '{{ csrf_token() }}',
+            apiUrl: '{{ config('app.url') }}/api',
+            appUrl: '{{ config('app.url') }}'
+        };
+    </script>
+</body>
+</html>
+```
+
+### Web Routes Configuration
+
+```php
+<?php
+// routes/web.php
+use Illuminate\Support\Facades\Route;
+
+// Admin routes (Filament)
+// Filament automatically handles /admin routes
+
+// API routes are in routes/api.php
+
+// React SPA routes - CRITICAL: This catches all frontend routes
+Route::get('/{path?}', function () {
+    return view('app');
+})->where('path', '^(?!admin|api).*$')->name('spa');
+
+// This regex ensures:
+// - /admin/* goes to Filament
+// - /api/* goes to API routes  
+// - Everything else goes to React SPA
+```
+
+### API Routes Configuration
+
+```php
+<?php
+// routes/api.php
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\QuoteController;
+use App\Http\Controllers\Api\SettingsController;
+
+// Calculator endpoints - EXACT paths expected by React
+Route::prefix('calculator')->group(function () {
+    Route::get('/status', [QuoteController::class, 'checkAvailability']);
+    Route::post('/calculate', [QuoteController::class, 'calculatePrice']);
+});
+
+// Quote management
+Route::post('/quotes', [QuoteController::class, 'store']);
+Route::get('/quotes/{angebotsnummer}', [QuoteController::class, 'show']);
+
+// Public settings for frontend
+Route::get('/settings/public', [SettingsController::class, 'getPublicSettings']);
+
+// CORS middleware is automatically applied to api routes
+```
+
+### CORS Configuration
+
+```php
+<?php
+// config/cors.php
+return [
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'allowed_methods' => ['*'],
+    'allowed_origins' => ['*'], // In production, specify your domain
+    'allowed_origins_patterns' => [],
+    'allowed_headers' => ['*'],
+    'exposed_headers' => [],
+    'max_age' => 0,
+    'supports_credentials' => false,
+];
+```
+
+### React API Client Configuration
+
+The React app uses this API client structure. Ensure your Laravel API matches:
+
+```javascript
+// src/lib/api.js - This file exists in the React app
+const API_BASE_URL = window.Laravel?.apiUrl || '/api';
+
+export const calculatorApi = {
+    // This calls GET /api/calculator/status
+    isCalculatorEnabled: async () => {
+        const response = await fetch(`${API_BASE_URL}/calculator/status`);
+        return response.json();
+    }
+};
+
+export const quoteApi = {
+    // This calls POST /api/quotes
+    submitQuote: async (quoteData) => {
+        const response = await fetch(`${API_BASE_URL}/quotes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': window.Laravel?.csrfToken
+            },
+            body: JSON.stringify(quoteData)
+        });
+        return response.json();
+    }
+};
+```
+
 ## 🔌 API Implementation
 
 ### 1. Quote Controller
@@ -1003,10 +1249,13 @@ class QuoteController extends Controller
         try {
             $data = $request->validated();
             
-            // Calculate estimated price
-            $data['estimated_total'] = $this->calculator->calculate($data);
+            // Transform React frontend data to Laravel format
+            $transformedData = $this->transformFrontendData($data);
             
-            $quote = QuoteRequest::create($data);
+            // Calculate estimated price
+            $transformedData['estimated_total'] = $this->calculator->calculate($transformedData);
+            
+            $quote = QuoteRequest::create($transformedData);
             
             // Send confirmation email
             Mail::to($quote->email)->send(new QuoteConfirmationMail($quote));
@@ -1033,12 +1282,50 @@ class QuoteController extends Controller
         }
     }
 
-    public function calculatePrice(QuoteRequestValidation $request): JsonResponse
+    /**
+     * Transform React frontend data format to Laravel database format
+     */
+    private function transformFrontendData(array $frontendData): array
+    {
+        return [
+            // Basic customer info
+            'name' => $frontendData['name'],
+            'email' => $frontendData['email'],
+            'telefon' => $frontendData['phone'] ?? $frontendData['telefon'],
+            'bevorzugter_kontakt' => $frontendData['preferredContact'] ?? 'email',
+            
+            // Moving details
+            'from_address' => $frontendData['movingDetails']['fromAddress'] ?? '',
+            'to_address' => $frontendData['movingDetails']['toAddress'] ?? '',
+            'from_postal_code' => $frontendData['movingDetails']['fromPostalCode'] ?? null,
+            'to_postal_code' => $frontendData['movingDetails']['toPostalCode'] ?? null,
+            'moving_date' => $frontendData['preferredDate'] ?? now()->addDays(7)->format('Y-m-d'),
+            'moving_type' => 'local', // Default, can be enhanced based on distance
+            
+            // Services
+            'ausgewaehlte_services' => $frontendData['selectedServices'] ?? [],
+            'service_details' => [
+                'moving' => $frontendData['movingDetails'] ?? [],
+                'cleaning' => $frontendData['cleaningDetails'] ?? [],
+                'declutter' => $frontendData['declutterDetails'] ?? []
+            ],
+            
+            // Additional info
+            'special_requirements' => $frontendData['message'] ?? null,
+            'submitted_at' => now(),
+        ];
+    }
+
+    public function calculatePrice(Request $request): JsonResponse
     {
         try {
-            $data = $request->validated();
-            $price = $this->calculator->calculate($data);
-            $breakdown = $this->calculator->getBreakdown($data);
+            $data = $request->all();
+            
+            // Transform frontend data for calculation
+            $transformedData = $this->transformFrontendData($data);
+            
+            $price = $this->calculator->calculate($transformedData);
+            $breakdown = $this->calculator->getBreakdown($transformedData);
             
             return response()->json([
                 'success' => true,
@@ -1049,6 +1336,11 @@ class QuoteController extends Controller
             ]);
             
         } catch (\Exception $e) {
+            Log::error('Price calculation failed', [
+                'error' => $e->getMessage(),
+                'data' => $request->all()
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Fehler bei der Preisberechnung'
@@ -1082,20 +1374,46 @@ class QuoteRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Basic customer info (matches React form exactly)
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'telefon' => 'nullable|string|max:50',
-            'bevorzugter_kontakt' => 'required|in:email,phone,whatsapp',
-            'from_address' => 'required|string|max:500',
-            'to_address' => 'required|string|max:500',
-            'from_postal_code' => 'nullable|string|max:10',
-            'to_postal_code' => 'nullable|string|max:10',
-            'moving_date' => 'required|date|after:today',
-            'moving_type' => 'required|in:local,long_distance,international',
-            'ausgewaehlte_services' => 'required|array|min:1',
-            'ausgewaehlte_services.*' => 'in:umzug,putzservice,entruempelung',
-            'service_details' => 'nullable|array',
-            'special_requirements' => 'nullable|string|max:1000',
+            'phone' => 'nullable|string|max:50',
+            'telefon' => 'nullable|string|max:50', // Alternative field name
+            'preferredContact' => 'nullable|in:email,phone,whatsapp',
+            'preferredDate' => 'nullable|date|after:today',
+            'message' => 'nullable|string|max:1000',
+            
+            // Services (matches React exactly)
+            'selectedServices' => 'required|array|min:1',
+            'selectedServices.*' => 'in:umzug,putzservice,entruempelung',
+            
+            // Moving details (nested object from React)
+            'movingDetails' => 'nullable|array',
+            'movingDetails.fromAddress' => 'nullable|string|max:500',
+            'movingDetails.toAddress' => 'nullable|string|max:500',
+            'movingDetails.fromPostalCode' => 'nullable|string|max:10',
+            'movingDetails.toPostalCode' => 'nullable|string|max:10',
+            'movingDetails.rooms' => 'nullable|integer|min:1|max:20',
+            'movingDetails.floors' => 'nullable|integer|min:0|max:10',
+            
+            // Cleaning details (nested object from React)
+            'cleaningDetails' => 'nullable|array',
+            'cleaningDetails.rooms' => 'nullable|integer|min:1|max:20',
+            'cleaningDetails.bathrooms' => 'nullable|integer|min:1|max:10',
+            'cleaningDetails.deepCleaning' => 'nullable|boolean',
+            
+            // Declutter details (nested object from React)
+            'declutterDetails' => 'nullable|array',
+            'declutterDetails.volume' => 'nullable|string|in:small,medium,large',
+            'declutterDetails.items' => 'nullable|array',
+            
+            // Pricing info from React
+            'pricing' => 'nullable|array',
+            'pricing.total' => 'nullable|numeric|min:0',
+            
+            // Metadata
+            'submittedAt' => 'nullable|date',
+            'source' => 'nullable|string|in:calculator,contact_form',
         ];
     }
 
@@ -1803,7 +2121,7 @@ MAIL_FROM_ADDRESS=noreply@yla-umzug.de
 MAIL_FROM_NAME="YLA Umzug"
 
 # OpenRouteService API
-OPENROUTE_API_KEY=your-api-key-here
+OPENROUTE_API_KEY=eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjVmM2M0OTRkNGE0NzQzZjliMTRlMmJmY2M3N2EwZTQ1IiwiaCI6Im11cm11cjY0In0=
 
 # Filament
 FILAMENT_DOMAIN=admin.yla-umzug.de
@@ -1879,55 +2197,146 @@ class AppServiceProvider extends ServiceProvider
 
 ## 🎯 Implementation Priority
 
-### Phase 1 (Critical - Week 1)
-1. Set up Laravel project structure
-2. Create database migrations
-3. Implement basic models and relationships
-4. Set up Filament admin panel
-5. Create quote management interface
+### Phase 1 (Critical - Day 1-2)
+1. **Set up Laravel project structure** with exact directory matching
+2. **Create database migrations** with exact field names and types
+3. **Implement models** with exact relationships and casts
+4. **Configure routes** (web.php and api.php) with exact paths
+5. **Create basic API endpoints** that match React expectations
 
-### Phase 2 (High Priority - Week 2)
-1. Implement API endpoints for React frontend
-2. Add distance calculation service
-3. Create email notification system
-4. Set up PDF generation
-5. Add comprehensive validation
+### Phase 2 (High Priority - Day 3-4)
+1. **Implement Quote Controller** with exact request/response formats
+2. **Add distance calculation service** with OpenRoute API key
+3. **Set up Filament admin panel** with German localization
+4. **Create quote management interface** with all actions
+5. **Test API integration** with existing React frontend
 
-### Phase 3 (Medium Priority - Week 3)
-1. Implement advanced Filament features
-2. Add settings management
-3. Create user management system
-4. Add comprehensive error handling
-5. Implement caching and optimization
+### Phase 3 (Medium Priority - Day 5-6)
+1. **Add email notification system** with templates
+2. **Set up PDF generation** service
+3. **Implement settings management** in Filament
+4. **Add comprehensive error handling** and logging
+5. **Configure CORS and security** middleware
 
-### Phase 4 (Production Ready - Week 4)
-1. Security hardening
-2. Performance optimization
-3. Monitoring and logging setup
-4. Deployment configuration
-5. Documentation and testing
+### Phase 4 (Production Ready - Day 7)
+1. **Final testing** of all API endpoints
+2. **Security hardening** and rate limiting
+3. **Performance optimization** and caching
+4. **Deployment configuration** for hosting
+5. **Documentation** and final validation
+
+### WhatsApp Integration (Optional - After Core)
+1. **Set up WhatsApp Business API** account
+2. **Create message templates** and get approval
+3. **Implement WhatsApp service** class
+4. **Add WhatsApp actions** to Filament dashboard
+5. **Test message delivery** and document handling
 
 ---
 
-## 📝 Notes for AI Agent
+## 📝 CRITICAL INSTRUCTIONS FOR AI AGENT
 
-**CRITICAL PRESERVATION REQUIREMENTS:**
-- Keep ALL existing React components and UI exactly as they are
-- Preserve all frontend functionality and user experience
-- Maintain existing styling and animations
-- Do not modify any existing frontend routes or navigation
+### 🚨 ABSOLUTE REQUIREMENTS - DO NOT MODIFY FRONTEND
 
-**INTEGRATION POINTS:**
-- React frontend should communicate with Laravel API endpoints
-- Preserve existing form validation and user interactions
-- Maintain existing mobile responsiveness
-- Keep existing build system (Vite) working
+**PRESERVE 100% OF EXISTING FRONTEND:**
+- **DO NOT CHANGE** any React components, styling, or animations
+- **DO NOT MODIFY** any existing frontend routes or navigation  
+- **DO NOT ALTER** any existing form validation or user interactions
+- **DO NOT TOUCH** the existing build system (Vite, Tailwind, etc.)
+- **KEEP ALL** mobile responsiveness and UI/UX exactly as is
 
-**TESTING REQUIREMENTS:**
-- Test all API endpoints with existing React frontend
-- Verify email functionality works
-- Test PDF generation
-- Ensure admin panel is fully functional
-- Validate distance calculation integration
+### 🎯 EXACT API INTEGRATION REQUIREMENTS
 
-This guide provides a complete roadmap for transforming your React-only application into a professional, production-ready Laravel + Filament + React application while preserving all existing frontend functionality.
+**API ENDPOINTS MUST MATCH EXACTLY:**
+- `GET /api/calculator/status` - Returns calculator availability
+- `POST /api/calculator/calculate` - Calculates prices from React data
+- `POST /api/quotes` - Accepts quote submissions from React form
+- All request/response formats must match the examples above **EXACTLY**
+
+**DATA TRANSFORMATION IS CRITICAL:**
+- React sends data in camelCase format (selectedServices, movingDetails)
+- Laravel database uses snake_case (ausgewaehlte_services, service_details)
+- The `transformFrontendData()` method handles this conversion
+- **DO NOT** change the React data format - transform it in Laravel
+
+### 🔧 IMPLEMENTATION CHECKLIST
+
+**Phase 1 - Core Backend (MUST DO FIRST):**
+- [ ] Install Laravel 10 in the existing project directory
+- [ ] Create exact database schema with all field names as specified
+- [ ] Implement QuoteRequest model with exact casts and relationships
+- [ ] Set up API routes with exact paths (`/api/calculator/*`, `/api/quotes`)
+- [ ] Create QuoteController with exact request/response formats
+
+**Phase 2 - Filament Dashboard (HIGH PRIORITY):**
+- [ ] Install Filament v3 with German localization
+- [ ] Create QuoteRequestResource with all German labels
+- [ ] Add distance calculation integration with OpenRoute API
+- [ ] Implement quote workflow (pending → reviewed → quoted → completed)
+- [ ] Add bulk actions and filtering capabilities
+
+**Phase 3 - Services Integration (MEDIUM PRIORITY):**
+- [ ] Implement OpenRouteServiceCalculator with provided API key
+- [ ] Create PriceCalculator service with German pricing logic
+- [ ] Set up email system with German templates
+- [ ] Add PDF generation service
+- [ ] Configure all service providers and bindings
+
+**Phase 4 - Production Features (AFTER CORE WORKS):**
+- [ ] Add comprehensive error handling and logging
+- [ ] Implement rate limiting and security middleware
+- [ ] Set up caching for distance calculations
+- [ ] Configure deployment settings
+- [ ] Add monitoring and backup systems
+
+### 🧪 TESTING REQUIREMENTS
+
+**CRITICAL VALIDATION STEPS:**
+1. **API Testing**: Use existing React frontend to test all endpoints
+2. **Data Flow**: Verify React → Laravel → Database → Filament works
+3. **Admin Dashboard**: Test all Filament features with real data
+4. **Distance Calculation**: Verify OpenRoute API integration works
+5. **Email System**: Test quote confirmation and notification emails
+
+### 🔑 CONFIGURATION DETAILS
+
+**Environment Variables (EXACT):**
+```env
+OPENROUTE_API_KEY=eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjVmM2M0OTRkNGE0NzQzZjliMTRlMmJmY2M3N2EwZTQ1IiwiaCI6Im11cm11cjY0In0=
+```
+
+**File Structure (MUST PRESERVE):**
+- Keep all existing `src/` React components unchanged
+- Add Laravel `app/`, `database/`, `routes/` directories
+- Preserve existing `package.json`, `vite.config.js`, `tailwind.config.js`
+- Add `composer.json` and Laravel configuration files
+
+### ⚠️ COMMON MISTAKES TO AVOID
+
+**DO NOT:**
+- Change any React component file names or structure
+- Modify existing API client code in `src/lib/api.js`
+- Alter existing form validation in React components
+- Change existing routing in React Router
+- Modify existing styling or CSS files
+- Break existing mobile responsiveness
+
+**DO:**
+- Add Laravel backend that serves the existing React app
+- Create API endpoints that match existing React expectations
+- Transform data between React format and Laravel format
+- Add Filament admin panel as separate admin interface
+- Preserve all existing frontend functionality
+
+### 🎯 SUCCESS CRITERIA
+
+**The implementation is successful when:**
+1. Existing React frontend works exactly as before
+2. All calculator functionality works through Laravel API
+3. Quote submissions save to Laravel database
+4. Filament admin panel shows and manages all quotes
+5. Distance calculation works with OpenRoute API
+6. Email notifications are sent for new quotes
+7. Admin can create final quotes and send them to customers
+
+**Remember: The goal is to ADD a professional backend to the existing frontend, not replace or modify the frontend in any way.**

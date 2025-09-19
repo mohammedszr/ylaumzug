@@ -22,8 +22,9 @@ class SendQuoteEmailsJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public QuoteRequest $quoteRequest;
-    public int $tries = 3;
-    public int $backoff = 60; // seconds
+    public int $tries = 5;
+    public array $backoff = [60, 300, 900]; // 1 min, 5 min, 15 min
+    public int $maxExceptions = 3;
 
     /**
      * Create a new job instance.

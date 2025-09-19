@@ -11,6 +11,7 @@ use App\Services\PdfQuoteService;
 use App\Jobs\SendQuoteEmailsJob;
 use App\Mail\PdfQuoteMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class QuoteController extends Controller
 {
@@ -29,22 +30,23 @@ class QuoteController extends Controller
     public function submit(SubmitQuoteRequest $request): JsonResponse
     {
         try {
-            // Create quote request record
+            // Create quote request record with German field names
             $quoteRequest = QuoteRequest::create([
                 'name' => $request->input('name'),
                 'email' => $request->input('email'),
-                'phone' => $request->input('phone'),
-                'preferred_date' => $request->input('preferredDate'),
-                'preferred_contact' => $request->input('preferredContact', 'email'),
+                'telefon' => $request->input('phone'),
+                'moving_date' => $request->input('preferredDate'),
+                'bevorzugter_kontakt' => $request->input('preferredContact', 'email'),
                 'message' => $request->input('message'),
-                'selected_services' => $request->input('selectedServices', []),
+                'ausgewaehlte_services' => $request->input('selectedServices', []),
                 'service_details' => $request->only([
                     'movingDetails',
                     'cleaningDetails', 
                     'declutterDetails'
                 ]),
-                'pricing_data' => $request->input('pricingData'),
-                'status' => 'pending'
+                'estimated_total' => $request->input('pricing.total'),
+                'status' => 'pending',
+                'submitted_at' => now()
             ]);
 
             // Send email notifications (with queue support)
@@ -67,17 +69,22 @@ class QuoteController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Ihre Anfrage wurde erfolgreich gesendet. Wir melden uns innerhalb von 24 Stunden bei Ihnen zurück.',
-                'quote_id' => $quoteRequest->id
-            ]);
+                'message' => 'Angebotsanfrage erfolgreich eingereicht',
+                'data' => [
+                    'angebotsnummer' => $quoteRequest->angebotsnummer,
+                    'estimated_total' => $quoteRequest->estimated_total
+                ]
+            ], 201);
 
         } catch (\Exception $e) {
-            \Log::error('Quote submission error: ' . $e->getMessage());
+            Log::error('Quote submission failed', [
+                'error' => $e->getMessage(),
+                'data' => $request->all()
+            ]);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Fehler beim Senden der Anfrage. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.',
-                'error' => config('app.debug') ? $e->getMessage() : null
+                'message' => 'Fehler beim Einreichen der Anfrage'
             ], 500);
         }
     }

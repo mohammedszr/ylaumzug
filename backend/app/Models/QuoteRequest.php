@@ -5,44 +5,51 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Mail;
+use App\Contracts\PriceCalculatorInterface;
+use App\Mail\QuoteReadyMail;
 
 class QuoteRequest extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'quote_number',
+        'angebotsnummer',
         'name',
         'email',
-        'phone',
-        'preferred_date',
-        'preferred_contact',
+        'telefon',
+        'bevorzugter_kontakt',
         'message',
-        'selected_services',
+        'from_address',
+        'to_address',
+        'from_postal_code',
+        'to_postal_code',
+        'distance_km',
+        'moving_date',
+        'moving_type',
+        'ausgewaehlte_services',
         'service_details',
-        'pricing_data',
+        'estimated_total',
+        'endgueltiger_angebotsbetrag',
         'status',
-        'admin_notes',
-        'final_quote_amount',
-        'quoted_at',
-        'responded_at',
-        'source',
-        'user_agent',
-        'ip_address',
+        'special_requirements',
+        'admin_notizen',
+        'submitted_at',
         'email_sent_at',
-        'email_status'
+        'whatsapp_sent_at'
     ];
 
     protected $casts = [
-        'preferred_date' => 'date',
-        'selected_services' => 'array',
+        'ausgewaehlte_services' => 'array',
         'service_details' => 'array',
-        'pricing_data' => 'array',
-        'final_quote_amount' => 'decimal:2',
-        'quoted_at' => 'datetime',
-        'responded_at' => 'datetime',
+        'moving_date' => 'date',
+        'submitted_at' => 'datetime',
+        'estimated_total' => 'decimal:2',
+        'endgueltiger_angebotsbetrag' => 'decimal:2',
+        'distance_km' => 'decimal:2',
         'email_sent_at' => 'datetime',
-        'email_status' => 'array'
+        'whatsapp_sent_at' => 'datetime'
     ];
 
     /**
@@ -53,30 +60,28 @@ class QuoteRequest extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            if (!$model->quote_number) {
-                $model->quote_number = static::generateQuoteNumber();
+            if (empty($model->angebotsnummer)) {
+                $model->angebotsnummer = self::generateQuoteNumber();
             }
         });
     }
 
-    /**
-     * Generate unique quote number
-     */
     public static function generateQuoteNumber(): string
     {
-        do {
-            $number = 'YLA-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
-        } while (static::where('quote_number', $number)->exists());
-
-        return $number;
+        $year = date('Y');
+        $lastQuote = self::whereYear('created_at', $year)
+            ->orderBy('id', 'desc')
+            ->first();
+        
+        $number = $lastQuote ? (int)substr($lastQuote->angebotsnummer, -3) + 1 : 1;
+        
+        return sprintf('QR-%s-%03d', $year, $number);
     }
 
-    /**
-     * Get the estimated total from pricing data
-     */
-    public function getEstimatedTotalAttribute(): ?float
+    public function calculateEstimatedPrice(): float
     {
-        return $this->pricing_data['total'] ?? null;
+        $calculator = app(PriceCalculatorInterface::class);
+        return $calculator->calculate($this->toArray());
     }
 
     /**
@@ -90,7 +95,7 @@ class QuoteRequest extends Model
             'putzservice' => 'Putzservice'
         ];
 
-        $services = collect($this->selected_services)
+        $services = collect($this->ausgewaehlte_services)
             ->map(fn($service) => $serviceNames[$service] ?? $service)
             ->join(', ');
 
@@ -102,9 +107,10 @@ class QuoteRequest extends Model
      */
     public function getPreferredContactFormattedAttribute(): string
     {
-        return match($this->preferred_contact) {
+        return match($this->bevorzugter_kontakt) {
             'email' => 'E-Mail',
             'phone' => 'Telefon',
+            'whatsapp' => 'WhatsApp',
             default => 'E-Mail'
         };
     }
@@ -144,27 +150,27 @@ class QuoteRequest extends Model
     /**
      * Mark as reviewed
      */
-    public function markAsReviewed(string $adminNotes = null): void
+    public function markAsReviewed(?string $adminNotes = null): void
     {
         $this->update([
             'status' => 'reviewed',
-            'admin_notes' => $adminNotes,
-            'responded_at' => now()
+            'admin_notizen' => $adminNotes
         ]);
     }
 
     /**
      * Mark as quoted
      */
-    public function markAsQuoted(float $finalAmount, string $adminNotes = null): void
+    public function markAsQuoted(float $amount, ?string $notes = null): void
     {
         $this->update([
             'status' => 'quoted',
-            'final_quote_amount' => $finalAmount,
-            'admin_notes' => $adminNotes,
-            'quoted_at' => now(),
-            'responded_at' => now()
+            'endgueltiger_angebotsbetrag' => $amount,
+            'admin_notizen' => $notes
         ]);
+        
+        // Send quote email
+        Mail::to($this->email)->send(new QuoteReadyMail($this));
     }
 
     /**
@@ -196,7 +202,43 @@ class QuoteRequest extends Model
      */
     public function scopeWithService(Builder $query, string $service): Builder
     {
-        return $query->whereJsonContains('selected_services', $service);
+        return $query->whereJsonContains('ausgewaehlte_services', $service);
+    }
+
+    /**
+     * Scope for optimized admin listing with eager loading
+     */
+    public function scopeForAdminListing(Builder $query): Builder
+    {
+        return $query->select([
+            'id',
+            'angebotsnummer',
+            'name',
+            'email',
+            'telefon',
+            'status',
+            'moving_date',
+            'estimated_total',
+            'endgueltiger_angebotsbetrag',
+            'email_sent_at',
+            'whatsapp_sent_at',
+            'created_at',
+            'updated_at'
+        ]);
+    }
+
+    /**
+     * Scope for dashboard statistics (optimized)
+     */
+    public function scopeForStats(Builder $query): Builder
+    {
+        return $query->select([
+            'id',
+            'status',
+            'estimated_total',
+            'endgueltiger_angebotsbetrag',
+            'created_at'
+        ]);
     }
 
     /**
@@ -208,9 +250,8 @@ class QuoteRequest extends Model
             'total' => static::count(),
             'pending' => static::pending()->count(),
             'this_month' => static::whereMonth('created_at', now()->month)->count(),
-            'avg_estimate' => static::whereNotNull('pricing_data->total')
-                ->get()
-                ->avg(fn($quote) => $quote->pricing_data['total'] ?? 0),
+            'avg_estimate' => static::whereNotNull('estimated_total')
+                ->avg('estimated_total'),
             'conversion_rate' => static::count() > 0 
                 ? (static::whereIn('status', ['accepted', 'completed'])->count() / static::count()) * 100 
                 : 0

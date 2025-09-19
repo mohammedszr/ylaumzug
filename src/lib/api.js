@@ -2,8 +2,6 @@
  * API utility for communicating with Laravel backend
  */
 
-import { payloadAPI } from './payload-api';
-
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 class ApiError extends Error {
@@ -106,31 +104,17 @@ export const calculatorApi = {
   },
 
   /**
-   * Get available services from Payload CMS
+   * Get available services
    */
   async getServices() {
-    try {
-      const payloadServices = await payloadAPI.getServices();
-      return payloadServices;
-    } catch (error) {
-      // Fallback to Laravel API
-      console.warn('Payload CMS unavailable, falling back to Laravel API');
-      return apiRequest('/calculator/services');
-    }
+    return apiRequest('/calculator/services');
   },
 
   /**
-   * Check if calculator is enabled from Payload CMS
+   * Check if calculator is enabled
    */
   async isCalculatorEnabled() {
-    try {
-      const settings = await payloadAPI.getSiteSettings();
-      return { enabled: settings.calculatorEnabled };
-    } catch (error) {
-      // Fallback to Laravel API
-      console.warn('Payload CMS unavailable, falling back to Laravel API');
-      return apiRequest('/calculator/enabled');
-    }
+    return apiRequest('/calculator/enabled');
   },
 };
 
@@ -142,36 +126,10 @@ export const quoteApi = {
    * Submit quote request
    */
   async submitQuote(quoteData) {
-    try {
-      // Store quote in Payload CMS for admin management
-      const payloadQuote = await payloadAPI.createQuoteRequest({
-        email: quoteData.email,
-        phone: quoteData.phone,
-        name: quoteData.name,
-        services: quoteData.selectedServices,
-        totalPrice: quoteData.totalPrice,
-        priceBreakdown: quoteData.priceBreakdown,
-        status: 'new',
-      });
-
-      // Also send to Laravel for email processing
-      const laravelResponse = await apiRequest('/quotes/submit', {
-        method: 'POST',
-        body: JSON.stringify(quoteData),
-      });
-
-      return {
-        ...laravelResponse,
-        payloadId: payloadQuote.doc?.id,
-      };
-    } catch (error) {
-      // If Payload fails, still try Laravel
-      console.warn('Payload CMS unavailable for quote storage, using Laravel only');
-      return apiRequest('/quotes/submit', {
-        method: 'POST',
-        body: JSON.stringify(quoteData),
-      });
-    }
+    return apiRequest('/quotes/submit', {
+      method: 'POST',
+      body: JSON.stringify(quoteData),
+    });
   },
 };
 
