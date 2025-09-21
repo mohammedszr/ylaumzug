@@ -15,39 +15,109 @@ class QuoteRequest extends Model
     use HasFactory;
 
     protected $fillable = [
+        'quote_number',
         'angebotsnummer',
         'name',
         'email',
+        'phone',
         'telefon',
+        'preferred_contact',
         'bevorzugter_kontakt',
         'message',
-        'from_address',
-        'to_address',
+        'selected_services',
+        'ausgewaehlte_services',
+        'service_details',
+        'pricing_data',
         'from_postal_code',
         'to_postal_code',
         'distance_km',
-        'moving_date',
+        'preferred_date',
         'moving_type',
-        'ausgewaehlte_services',
-        'service_details',
-        'estimated_total',
-        'endgueltiger_angebotsbetrag',
+        'final_quote_amount',
         'status',
-        'special_requirements',
-        'admin_notizen',
-        'submitted_at',
+        'admin_notes',
+        'quoted_at',
+        'responded_at',
+        'source',
+        'user_agent',
+        'ip_address',
         'email_sent_at',
-        'whatsapp_sent_at'
+        'whatsapp_sent_at',
+        // Moving Addresses
+        'from_street',
+        'from_city',
+        'from_floor',
+        'from_elevator',
+        'to_street',
+        'to_city',
+        'to_floor',
+        'to_elevator',
+        // Apartment Details
+        'flat_size_m2',
+        'flat_rooms',
+        'parking_options',
+        // Transport Volume
+        'boxes_count',
+        'beds_count',
+        'wardrobes_count',
+        'sofas_count',
+        'tables_chairs_count',
+        'washing_machine_count',
+        'fridge_count',
+        'other_electronics_count',
+        'furniture_disassembly',
+        'fragile_items',
+        // Additional Services
+        'service_furniture_assembly',
+        'service_packing',
+        'service_no_parking_zone',
+        'service_storage',
+        'service_disposal',
+        // Calculation Details
+        'base_price',
+        'distance_price',
+        'floor_price',
+        'volume_price',
+        'services_price',
+        'price_breakdown',
+        // Enhanced Address Information
+        'from_full_address',
+        'to_full_address',
+        'from_latitude',
+        'from_longitude',
+        'to_latitude',
+        'to_longitude'
     ];
 
     protected $casts = [
+        'selected_services' => 'array',
         'ausgewaehlte_services' => 'array',
         'service_details' => 'array',
-        'moving_date' => 'date',
-        'submitted_at' => 'datetime',
-        'estimated_total' => 'decimal:2',
-        'endgueltiger_angebotsbetrag' => 'decimal:2',
+        'pricing_data' => 'array',
+        'price_breakdown' => 'array',
+        'preferred_date' => 'date',
+        'quoted_at' => 'datetime',
+        'responded_at' => 'datetime',
+        'final_quote_amount' => 'decimal:2',
         'distance_km' => 'decimal:2',
+        'flat_size_m2' => 'decimal:2',
+        'base_price' => 'decimal:2',
+        'distance_price' => 'decimal:2',
+        'floor_price' => 'decimal:2',
+        'volume_price' => 'decimal:2',
+        'services_price' => 'decimal:2',
+        'from_latitude' => 'decimal:8',
+        'from_longitude' => 'decimal:8',
+        'to_latitude' => 'decimal:8',
+        'to_longitude' => 'decimal:8',
+        'from_elevator' => 'boolean',
+        'to_elevator' => 'boolean',
+        'furniture_disassembly' => 'boolean',
+        'service_furniture_assembly' => 'boolean',
+        'service_packing' => 'boolean',
+        'service_no_parking_zone' => 'boolean',
+        'service_storage' => 'boolean',
+        'service_disposal' => 'boolean',
         'email_sent_at' => 'datetime',
         'whatsapp_sent_at' => 'datetime'
     ];
@@ -60,8 +130,12 @@ class QuoteRequest extends Model
         parent::boot();
 
         static::creating(function ($model) {
+            $quoteNumber = self::generateQuoteNumber();
+            if (empty($model->quote_number)) {
+                $model->quote_number = $quoteNumber;
+            }
             if (empty($model->angebotsnummer)) {
-                $model->angebotsnummer = self::generateQuoteNumber();
+                $model->angebotsnummer = $quoteNumber;
             }
         });
     }

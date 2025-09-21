@@ -30,10 +30,14 @@ class SettingResource extends Resource
                             'pricing' => 'Preise',
                             'email' => 'E-Mail',
                             'api' => 'API',
-                            'ui' => 'Benutzeroberfläche'
+                            'ui' => 'Benutzeroberfläche',
+                            'moving' => 'Umzug',
+                            'cleaning' => 'Reinigung',
+                            'decluttering' => 'Entrümpelung'
                         ])
                         ->required()
-                        ->native(false),
+                        ->native(false)
+                        ->searchable(),
                         
                     Forms\Components\TextInput::make('key_name')
                         ->label('Schlüssel')
@@ -96,13 +100,36 @@ class SettingResource extends Resource
                 Tables\Columns\TextColumn::make('group_name')
                     ->label('Gruppe')
                     ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'general' => 'gray',
+                        'pricing' => 'success',
+                        'email' => 'info',
+                        'api' => 'warning',
+                        'ui' => 'primary',
+                        'moving' => 'success',
+                        'cleaning' => 'info',
+                        'decluttering' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'general' => 'Allgemein',
+                        'pricing' => 'Preise',
+                        'email' => 'E-Mail',
+                        'api' => 'API',
+                        'ui' => 'Benutzeroberfläche',
+                        'moving' => 'Umzug',
+                        'cleaning' => 'Reinigung',
+                        'decluttering' => 'Entrümpelung',
+                        default => ucfirst($state),
+                    })
                     ->searchable()
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('key_name')
                     ->label('Schlüssel')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->copyable(),
                     
                 Tables\Columns\TextColumn::make('value')
                     ->label('Wert')
@@ -110,19 +137,50 @@ class SettingResource extends Resource
                     ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
                         $state = $column->getState();
                         return strlen($state) > 50 ? $state : null;
+                    })
+                    ->formatStateUsing(function ($state, $record) {
+                        if ($record->type === 'boolean') {
+                            return $state === '1' ? 'Ja' : 'Nein';
+                        }
+                        if ($record->type === 'decimal' && is_numeric($state)) {
+                            return number_format((float)$state, 2, ',', '.') . ' €';
+                        }
+                        return $state;
                     }),
                     
-                Tables\Columns\BadgeColumn::make('type')
-                    ->label('Typ'),
+                Tables\Columns\TextColumn::make('type')
+                    ->label('Typ')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'string' => 'gray',
+                        'integer' => 'info',
+                        'decimal' => 'success',
+                        'boolean' => 'warning',
+                        'json' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'string' => 'Text',
+                        'integer' => 'Ganzzahl',
+                        'decimal' => 'Dezimalzahl',
+                        'boolean' => 'Ja/Nein',
+                        'json' => 'JSON',
+                        default => $state,
+                    }),
                     
                 Tables\Columns\IconColumn::make('is_public')
                     ->label('Öffentlich')
-                    ->boolean(),
+                    ->boolean()
+                    ->trueIcon('heroicon-o-eye')
+                    ->falseIcon('heroicon-o-eye-slash')
+                    ->trueColor('success')
+                    ->falseColor('gray'),
                     
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Aktualisiert')
                     ->dateTime('d.m.Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('group_name')
@@ -132,11 +190,29 @@ class SettingResource extends Resource
                         'pricing' => 'Preise',
                         'email' => 'E-Mail',
                         'api' => 'API',
-                        'ui' => 'Benutzeroberfläche'
-                    ]),
+                        'ui' => 'Benutzeroberfläche',
+                        'moving' => 'Umzug',
+                        'cleaning' => 'Reinigung',
+                        'decluttering' => 'Entrümpelung'
+                    ])
+                    ->multiple(),
+                    
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('Typ')
+                    ->options([
+                        'string' => 'Text',
+                        'integer' => 'Ganzzahl',
+                        'decimal' => 'Dezimalzahl',
+                        'boolean' => 'Ja/Nein',
+                        'json' => 'JSON'
+                    ])
+                    ->multiple(),
                     
                 Tables\Filters\TernaryFilter::make('is_public')
-                    ->label('Öffentlich'),
+                    ->label('Öffentlich sichtbar')
+                    ->placeholder('Alle')
+                    ->trueLabel('Nur öffentliche')
+                    ->falseLabel('Nur private'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

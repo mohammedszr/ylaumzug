@@ -1,0 +1,118 @@
+/* Custom Admin Styles for YLA Umzug */
+
+/* Ensure proper background colors */
+body {
+    background-color: #f8fafc !important;
+}
+
+.fi-main {
+    background-color: #f8fafc !important;
+}
+
+/* Fix white page issues */
+.fi-page {
+    min-height: 100vh;
+    background-color: #f8fafc;
+}
+
+/* Ensure content is visible */
+.fi-page-content {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin: 1rem 0;
+}
+
+/* Settings form styling */
+.fi-fo-tabs {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+/* Table styling */
+.fi-ta-table {
+    background-color: white;
+}
+
+/* Form sections */
+.fi-fo-section {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* German number formatting */
+.currency-input::after {
+    content: " €";
+    color: #6b7280;
+}
+
+/* Percentage inputs */
+.percentage-input::after {
+    content: " %";
+    color: #6b7280;
+}
+
+/* Success notifications */
+.fi-no-notification.fi-color-success {
+    background-color: #10b981;
+    color: white;
+}
+
+/* Warning notifications */
+.fi-no-notification.fi-color-warning {
+    background-color: #f59e0b;
+    color: white;
+}
+
+/* Ensure proper contrast */
+.fi-sidebar {
+    background-color: #1f2937;
+}
+
+.fi-sidebar-nav-item-label {
+    color: #d1d5db;
+}
+
+/* Fix any potential z-index issues */
+.fi-modal {
+    z-index: 9999;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+    .fi-page-content {
+        margin: 0.5rem;
+        padding: 1rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #111827 !important;
+    }
+    
+    .fi-main {
+        background-color: #111827 !important;
+    }
+    
+    .fi-page {
+        background-color: #111827;
+    }
+    
+    .fi-page-content {
+        background-color: #1f2937;
+        color: #f9fafb;
+    }
+    
+    .fi-fo-section {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #f9fafb;
+    }
+}

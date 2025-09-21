@@ -31,7 +31,10 @@ class AdminPanelProvider extends PanelProvider
             ->favicon(asset('favicon.ico'))
             ->colors([
                 'primary' => Color::Violet,
+                'gray' => Color::Slate,
             ])
+            ->font('Inter')
+
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -40,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 \App\Filament\Widgets\QuoteStatsWidget::class,
+                \App\Filament\Widgets\SettingsOverviewWidget::class,
                 Widgets\AccountWidget::class,
             ])
             ->middleware([

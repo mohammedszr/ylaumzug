@@ -15,14 +15,14 @@ class SettingsController extends Controller
     public function index()
     {
         $settingGroups = [
-            'calculator' => 'Calculator Control',
-            'business' => 'Business Information',
-            'moving' => 'Moving Service Pricing',
-            'decluttering' => 'Decluttering Service Pricing',
-            'cleaning' => 'Cleaning Service Pricing',
-            'discounts' => 'Discounts & Bonuses',
-            'surcharges' => 'Surcharges',
-            'pricing' => 'General Pricing'
+            'general' => 'Allgemeine Einstellungen',
+            'pricing' => 'Preiseinstellungen',
+            'moving' => 'Umzug Preise',
+            'cleaning' => 'Reinigung Preise',
+            'decluttering' => 'Entrümpelung Preise',
+            'email' => 'E-Mail Einstellungen',
+            'api' => 'API Einstellungen',
+            'ui' => 'Benutzeroberfläche'
         ];
 
         $settings = [];

@@ -28,11 +28,11 @@ class CalculateRequest extends FormRequest
             'movingDetails.rooms' => 'nullable|numeric|min:1|max:20',
             'movingDetails.fromAddress' => 'nullable|array',
             'movingDetails.fromAddress.street' => 'nullable|string|max:255',
-            'movingDetails.fromAddress.postalCode' => 'nullable|string|max:10',
+            'movingDetails.fromAddress.postalCode' => 'nullable|string|max:32',
             'movingDetails.fromAddress.city' => 'nullable|string|max:100',
             'movingDetails.toAddress' => 'nullable|array',
             'movingDetails.toAddress.street' => 'nullable|string|max:255',
-            'movingDetails.toAddress.postalCode' => 'nullable|string|max:10',
+            'movingDetails.toAddress.postalCode' => 'nullable|string|max:32',
             'movingDetails.toAddress.city' => 'nullable|string|max:100',
             
             // Cleaning details validation - matching frontend structure
@@ -47,7 +47,7 @@ class CalculateRequest extends FormRequest
             'declutterDetails.size' => 'nullable|string|in:small,medium,large,very-large',
             'declutterDetails.address' => 'nullable|array',
             'declutterDetails.address.street' => 'nullable|string|max:255',
-            'declutterDetails.address.postalCode' => 'nullable|string|max:10',
+            'declutterDetails.address.postalCode' => 'nullable|string|max:32',
             'declutterDetails.address.city' => 'nullable|string|max:100',
             
             // General info validation
@@ -78,7 +78,7 @@ class CalculateRequest extends FormRequest
             'movingDetails.fromAddress.street.string' => 'Straße muss ein Text sein',
             'movingDetails.fromAddress.street.max' => 'Straße darf höchstens 255 Zeichen haben',
             'movingDetails.fromAddress.postalCode.string' => 'Postleitzahl muss ein Text sein',
-            'movingDetails.fromAddress.postalCode.max' => 'Postleitzahl darf höchstens 10 Zeichen haben',
+            'movingDetails.fromAddress.postalCode.max' => 'Postleitzahl darf höchstens 32 Zeichen haben',
             'movingDetails.fromAddress.city.string' => 'Stadt muss ein Text sein',
             'movingDetails.fromAddress.city.max' => 'Stadt darf höchstens 100 Zeichen haben',
             
@@ -86,7 +86,7 @@ class CalculateRequest extends FormRequest
             'movingDetails.toAddress.street.string' => 'Straße muss ein Text sein',
             'movingDetails.toAddress.street.max' => 'Straße darf höchstens 255 Zeichen haben',
             'movingDetails.toAddress.postalCode.string' => 'Postleitzahl muss ein Text sein',
-            'movingDetails.toAddress.postalCode.max' => 'Postleitzahl darf höchstens 10 Zeichen haben',
+            'movingDetails.toAddress.postalCode.max' => 'Postleitzahl darf höchstens 32 Zeichen haben',
             'movingDetails.toAddress.city.string' => 'Stadt muss ein Text sein',
             'movingDetails.toAddress.city.max' => 'Stadt darf höchstens 100 Zeichen haben',
             
@@ -110,7 +110,7 @@ class CalculateRequest extends FormRequest
             'declutterDetails.address.street.string' => 'Straße muss ein Text sein',
             'declutterDetails.address.street.max' => 'Straße darf höchstens 255 Zeichen haben',
             'declutterDetails.address.postalCode.string' => 'Postleitzahl muss ein Text sein',
-            'declutterDetails.address.postalCode.max' => 'Postleitzahl darf höchstens 10 Zeichen haben',
+            'declutterDetails.address.postalCode.max' => 'Postleitzahl darf höchstens 32 Zeichen haben',
             'declutterDetails.address.city.string' => 'Stadt muss ein Text sein',
             'declutterDetails.address.city.max' => 'Stadt darf höchstens 100 Zeichen haben',
             

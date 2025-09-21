@@ -5,9 +5,25 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use App\Services\Calculators\MovingPriceCalculator;
+use App\Services\Calculators\CleaningPriceCalculator;
+use App\Services\Calculators\DeclutterPriceCalculator;
 
 class CalculatorController extends Controller
 {
+    private MovingPriceCalculator $movingCalculator;
+    private CleaningPriceCalculator $cleaningCalculator;
+    private DeclutterPriceCalculator $declutterCalculator;
+
+    public function __construct(
+        MovingPriceCalculator $movingCalculator,
+        CleaningPriceCalculator $cleaningCalculator,
+        DeclutterPriceCalculator $declutterCalculator
+    ) {
+        $this->movingCalculator = $movingCalculator;
+        $this->cleaningCalculator = $cleaningCalculator;
+        $this->declutterCalculator = $declutterCalculator;
+    }
 
     /**
      * Calculate pricing for selected services
@@ -16,34 +32,33 @@ class CalculatorController extends Controller
     {
         try {
             $data = $request->all();
-            
-            // Basic calculation logic with fallback
             $selectedServices = $data['selectedServices'] ?? $data['services'] ?? [];
-            $total = 0;
-            $breakdown = [];
+            
+            $results = [];
+            $totalCost = 0;
+            $calculationDetails = [];
             
             foreach ($selectedServices as $service) {
-                $cost = $this->calculateServiceCost($service, $data);
-                $breakdown[] = [
-                    'service' => ucfirst($service),
-                    'cost' => $cost,
-                    'details' => $this->getServiceDetails($service, $data)
-                ];
-                $total += $cost;
+                $result = $this->calculateServiceWithDetails($service, $data);
+                if ($result) {
+                    $results[] = $result;
+                    $totalCost += $result['cost'];
+                    $calculationDetails[$service] = $result['calculation_details'] ?? [];
+                }
             }
             
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'services' => $breakdown,
-                    'total_cost' => $total,
+                    'services' => $results,
+                    'total_cost' => round($totalCost, 2),
                     'currency' => 'EUR',
                     'calculation_id' => 'calc_' . uniqid(),
+                    'calculation_details' => $calculationDetails,
+                    'input_data' => $data,
                     'breakdown' => [
-                        'base_costs' => array_combine($selectedServices, array_column($breakdown, 'cost')),
-                        'additional_costs' => ['rooms' => 0, 'distance' => 0, 'floors' => 0],
-                        'discounts' => [],
-                        'total' => $total
+                        'base_costs' => array_combine($selectedServices, array_column($results, 'cost')),
+                        'total' => round($totalCost, 2)
                     ]
                 ]
             ]);
@@ -140,55 +155,109 @@ class CalculatorController extends Controller
     }
 
     /**
-     * Calculate cost for a specific service
+     * Calculate service with detailed breakdown using proper calculators
      */
-    private function calculateServiceCost(string $service, array $data): float
+    private function calculateServiceWithDetails(string $service, array $data): ?array
     {
-        $basePrices = [
-            'umzug' => 150.00,
-            'putzservice' => 80.00,
-            'entruempelung' => 120.00
-        ];
-        
-        $basePrice = $basePrices[$service] ?? 100.00;
-        
-        // Add room-based pricing
-        if (isset($data['movingDetails']['rooms'])) {
-            $rooms = (int) $data['movingDetails']['rooms'];
-            if ($rooms > 1) {
-                $basePrice += ($rooms - 1) * 50; // €50 per additional room
+        try {
+            switch ($service) {
+                case 'umzug':
+                    return $this->calculateMovingService($data);
+                case 'putzservice':
+                    return $this->calculateCleaningService($data);
+                case 'entruempelung':
+                    return $this->calculateDeclutterService($data);
+                default:
+                    return null;
             }
+        } catch (\Exception $e) {
+            Log::error("Error calculating {$service}", [
+                'error' => $e->getMessage(),
+                'data' => $data
+            ]);
+            return null;
         }
-        
-        return $basePrice;
     }
 
     /**
-     * Get service details for breakdown
+     * Calculate moving service using MovingPriceCalculator
      */
-    private function getServiceDetails(string $service, array $data): array
+    private function calculateMovingService(array $data): array
     {
-        $details = [];
+        // Extract moving details and flatten the structure
+        $movingData = $data['movingDetails'] ?? [];
         
-        $basePrices = [
-            'umzug' => 150.00,
-            'putzservice' => 80.00,
-            'entruempelung' => 120.00
+        // Map the data structure to what the calculator expects
+        $calculatorData = array_merge($movingData, [
+            'rooms' => $movingData['flat_rooms'] ?? $movingData['rooms'] ?? 1,
+            'flat_rooms' => $movingData['flat_rooms'] ?? $movingData['rooms'] ?? 1
+        ]);
+        
+        // Debug log to see what data we're passing
+        Log::info('Moving calculator data', ['data' => $calculatorData]);
+        
+        $result = $this->movingCalculator->calculate($calculatorData);
+        
+        // Debug log to see the result
+        Log::info('Moving calculator result', ['result' => $result]);
+        
+        return [
+            'service' => 'Umzug',
+            'cost' => $result['total'],
+            'details' => $result['breakdown'],
+            'calculation_details' => $result['details'] ?? []
         ];
+    }
+
+    /**
+     * Calculate cleaning service using CleaningPriceCalculator
+     */
+    private function calculateCleaningService(array $data): array
+    {
+        $cleaningData = $data['cleaningDetails'] ?? [];
         
-        $details[] = "Grundpreis: " . number_format($basePrices[$service] ?? 100, 2) . " €";
-        
-        if (isset($data['movingDetails']['rooms'])) {
-            $rooms = (int) $data['movingDetails']['rooms'];
-            if ($rooms > 1) {
-                $additionalCost = ($rooms - 1) * 50;
-                $details[] = "Zimmer ({$rooms}): " . number_format($additionalCost, 2) . " €";
-            }
+        try {
+            $result = $this->cleaningCalculator->calculate($cleaningData);
+            return [
+                'service' => 'Putzservice',
+                'cost' => $result['total'],
+                'details' => $result['breakdown'] ?? [],
+                'calculation_details' => $result
+            ];
+        } catch (\Exception $e) {
+            Log::warning('Cleaning calculator failed, using fallback', ['error' => $e->getMessage()]);
+            return [
+                'service' => 'Putzservice',
+                'cost' => 80.0,
+                'details' => ['Grundpreis: €80.00'],
+                'calculation_details' => ['fallback' => true]
+            ];
         }
+    }
+
+    /**
+     * Calculate declutter service using DeclutterPriceCalculator
+     */
+    private function calculateDeclutterService(array $data): array
+    {
+        $declutterData = $data['declutterDetails'] ?? [];
         
-        $details[] = "Entfernung (ca. 0 km): 0.00 €";
-        $details[] = "Etagen-Zuschlag: 0.00 €";
-        
-        return $details;
+        try {
+            $result = $this->declutterCalculator->calculate($declutterData);
+            return [
+                'service' => 'Entrümpelung',
+                'cost' => $result['total'],
+                'details' => $result['breakdown'] ?? [],
+                'calculation_details' => $result
+            ];
+        } catch (\Exception $e) {
+            Log::warning('Declutter calculator failed, using fallback', ['error' => $e->getMessage()]);
+            return [
+                'service' => 'Entrümpelung',
+                'cost' => 120.0,
+                'details' => ['Grundpreis: €120.00'],
+                'calculation_details' => ['fallback' => true]
+            ];
+        }
     }
 }

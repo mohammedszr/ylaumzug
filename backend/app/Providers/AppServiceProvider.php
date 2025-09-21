@@ -22,8 +22,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DistanceCalculatorInterface::class, OpenRouteServiceCalculator::class);
         $this->app->bind(PriceCalculatorInterface::class, PricingService::class);
         
-        // Register calculator services
-        $this->app->singleton(MovingPriceCalculator::class);
+        // Register OpenRouteServiceCalculator as singleton
+        $this->app->singleton(OpenRouteServiceCalculator::class);
+        
+        // Register calculator services with proper dependencies
+        $this->app->singleton(MovingPriceCalculator::class, function ($app) {
+            return new MovingPriceCalculator($app->make(OpenRouteServiceCalculator::class));
+        });
+        
         $this->app->singleton(CleaningPriceCalculator::class);
         $this->app->singleton(DeclutterPriceCalculator::class);
         $this->app->singleton(DiscountCalculator::class);

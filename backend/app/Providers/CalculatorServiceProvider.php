@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Services\Calculators\DistanceCalculator;
+use App\Services\OpenRouteServiceCalculator;
 use App\Services\Calculators\MovingPriceCalculator;
 use App\Services\Calculators\DeclutterPriceCalculator;
 use App\Services\Calculators\CleaningPriceCalculator;
@@ -16,16 +16,16 @@ class CalculatorServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register Distance Calculator as singleton
-        $this->app->singleton(DistanceCalculator::class);
+        // Register OpenRouteServiceCalculator as singleton
+        $this->app->singleton(OpenRouteServiceCalculator::class);
         
         // Register Discount Calculator as singleton
         $this->app->singleton(DiscountCalculator::class);
         
-        // Register Price Calculators
+        // Register Price Calculators with correct dependencies
         $this->app->bind(MovingPriceCalculator::class, function ($app) {
             return new MovingPriceCalculator(
-                $app->make(DistanceCalculator::class)
+                $app->make(OpenRouteServiceCalculator::class)
             );
         });
         

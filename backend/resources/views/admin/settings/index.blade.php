@@ -19,7 +19,7 @@
                     <div class="flex items-center space-x-4">
                         <!-- Calculator Toggle -->
                         <div class="flex items-center space-x-2">
-                            <span class="text-sm font-medium text-gray-700">Calculator:</span>
+                            <span class="text-sm font-medium text-gray-700">Preisrechner:</span>
                             <button 
                                 id="calculator-toggle"
                                 class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ \App\Models\Setting::getValue('calculator_enabled', true) ? 'bg-indigo-600' : 'bg-gray-200' }}"
@@ -28,7 +28,7 @@
                                 <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ \App\Models\Setting::getValue('calculator_enabled', true) ? 'translate-x-6' : 'translate-x-1' }}"></span>
                             </button>
                             <span id="calculator-status" class="text-sm font-medium {{ \App\Models\Setting::getValue('calculator_enabled', true) ? 'text-green-600' : 'text-red-600' }}">
-                                {{ \App\Models\Setting::getValue('calculator_enabled', true) ? 'Enabled' : 'Disabled' }}
+                                {{ \App\Models\Setting::getValue('calculator_enabled', true) ? 'Aktiviert' : 'Deaktiviert' }}
                             </span>
                         </div>
                     </div>
@@ -67,8 +67,8 @@
                                             
                                             @if($setting->type === 'boolean')
                                                 <select name="settings[{{ $setting->key_name }}]" id="{{ $setting->key_name }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                                    <option value="1" {{ $setting->value === '1' ? 'selected' : '' }}>Yes</option>
-                                                    <option value="0" {{ $setting->value === '0' ? 'selected' : '' }}>No</option>
+                                                    <option value="1" {{ $setting->value === '1' ? 'selected' : '' }}>Ja</option>
+                                                    <option value="0" {{ $setting->value === '0' ? 'selected' : '' }}>Nein</option>
                                                 </select>
                                             @elseif($setting->type === 'json' || $setting->type === 'array')
                                                 <textarea 
@@ -76,7 +76,7 @@
                                                     id="{{ $setting->key_name }}" 
                                                     rows="3"
                                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                    placeholder="JSON format"
+                                                    placeholder="JSON Format"
                                                 >{{ $setting->value }}</textarea>
                                             @else
                                                 <input 
@@ -90,7 +90,7 @@
                                             @endif
                                             
                                             @if($setting->key_name)
-                                                <p class="mt-1 text-xs text-gray-500">Key: {{ $setting->key_name }}</p>
+                                                <p class="mt-1 text-xs text-gray-500">Schlüssel: {{ $setting->key_name }}</p>
                                             @endif
                                         </div>
                                     @endforeach
@@ -103,7 +103,7 @@
                 <!-- Save Button -->
                 <div class="flex justify-end">
                     <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        Save All Settings
+                        Alle Einstellungen speichern
                     </button>
                 </div>
             </form>
@@ -140,7 +140,7 @@
                         toggle.classList.add('bg-indigo-600');
                         toggle.querySelector('span').classList.remove('translate-x-1');
                         toggle.querySelector('span').classList.add('translate-x-6');
-                        status.textContent = 'Enabled';
+                        status.textContent = 'Aktiviert';
                         status.classList.remove('text-red-600');
                         status.classList.add('text-green-600');
                     } else {
@@ -148,14 +148,14 @@
                         toggle.classList.add('bg-gray-200');
                         toggle.querySelector('span').classList.remove('translate-x-6');
                         toggle.querySelector('span').classList.add('translate-x-1');
-                        status.textContent = 'Disabled';
+                        status.textContent = 'Deaktiviert';
                         status.classList.remove('text-green-600');
                         status.classList.add('text-red-600');
                     }
                 }
             } catch (error) {
                 console.error('Error toggling calculator:', error);
-                alert('Error updating calculator status');
+                alert('Fehler beim Aktualisieren des Preisrechner-Status');
             }
         }
     </script>
