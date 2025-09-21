@@ -22,13 +22,13 @@
                             <span class="text-sm font-medium text-gray-700">Calculator:</span>
                             <button 
                                 id="calculator-toggle"
-                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ Setting::getValue('calculator_enabled', true) ? 'bg-indigo-600' : 'bg-gray-200' }}"
+                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ \App\Models\Setting::getValue('calculator_enabled', true) ? 'bg-indigo-600' : 'bg-gray-200' }}"
                                 onclick="toggleCalculator()"
                             >
-                                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ Setting::getValue('calculator_enabled', true) ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ \App\Models\Setting::getValue('calculator_enabled', true) ? 'translate-x-6' : 'translate-x-1' }}"></span>
                             </button>
-                            <span id="calculator-status" class="text-sm font-medium {{ Setting::getValue('calculator_enabled', true) ? 'text-green-600' : 'text-red-600' }}">
-                                {{ Setting::getValue('calculator_enabled', true) ? 'Enabled' : 'Disabled' }}
+                            <span id="calculator-status" class="text-sm font-medium {{ \App\Models\Setting::getValue('calculator_enabled', true) ? 'text-green-600' : 'text-red-600' }}">
+                                {{ \App\Models\Setting::getValue('calculator_enabled', true) ? 'Enabled' : 'Disabled' }}
                             </span>
                         </div>
                     </div>
@@ -61,19 +61,19 @@
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     @foreach($group['settings'] as $setting)
                                         <div>
-                                            <label for="{{ $setting->key }}" class="block text-sm font-medium text-gray-700">
-                                                {{ $setting->description ?: $setting->key }}
+                                            <label for="{{ $setting->key_name }}" class="block text-sm font-medium text-gray-700">
+                                                {{ $setting->description ?: $setting->key_name }}
                                             </label>
                                             
                                             @if($setting->type === 'boolean')
-                                                <select name="settings[{{ $setting->key }}]" id="{{ $setting->key }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                                <select name="settings[{{ $setting->key_name }}]" id="{{ $setting->key_name }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                                     <option value="1" {{ $setting->value === '1' ? 'selected' : '' }}>Yes</option>
                                                     <option value="0" {{ $setting->value === '0' ? 'selected' : '' }}>No</option>
                                                 </select>
                                             @elseif($setting->type === 'json' || $setting->type === 'array')
                                                 <textarea 
-                                                    name="settings[{{ $setting->key }}]" 
-                                                    id="{{ $setting->key }}" 
+                                                    name="settings[{{ $setting->key_name }}]" 
+                                                    id="{{ $setting->key_name }}" 
                                                     rows="3"
                                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                                     placeholder="JSON format"
@@ -81,16 +81,16 @@
                                             @else
                                                 <input 
                                                     type="{{ $setting->type === 'decimal' || $setting->type === 'float' ? 'number' : ($setting->type === 'integer' ? 'number' : 'text') }}" 
-                                                    name="settings[{{ $setting->key }}]" 
-                                                    id="{{ $setting->key }}" 
+                                                    name="settings[{{ $setting->key_name }}]" 
+                                                    id="{{ $setting->key_name }}" 
                                                     value="{{ $setting->value }}"
                                                     @if($setting->type === 'decimal' || $setting->type === 'float') step="0.01" @endif
                                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                                 >
                                             @endif
                                             
-                                            @if($setting->key)
-                                                <p class="mt-1 text-xs text-gray-500">Key: {{ $setting->key }}</p>
+                                            @if($setting->key_name)
+                                                <p class="mt-1 text-xs text-gray-500">Key: {{ $setting->key_name }}</p>
                                             @endif
                                         </div>
                                     @endforeach

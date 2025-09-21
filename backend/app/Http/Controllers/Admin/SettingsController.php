@@ -29,7 +29,7 @@ class SettingsController extends Controller
         foreach ($settingGroups as $group => $title) {
             $settings[$group] = [
                 'title' => $title,
-                'settings' => Setting::where('group', $group)->orderBy('key')->get()
+                'settings' => Setting::where('group_name', $group)->orderBy('key_name')->get()
             ];
         }
 
@@ -43,20 +43,24 @@ class SettingsController extends Controller
     {
         $request->validate([
             'settings' => 'required|array',
-            'settings.*' => 'required'
+            'settings.*.key_name' => 'required|string',
+            'settings.*.value' => 'required',
+            'settings.*.type' => 'required|string|in:text,number,boolean,json,array'
         ]);
 
         foreach ($request->settings as $key => $value) {
-            $setting = Setting::where('key', $key)->first();
-            
-            if ($setting) {
-                // Cast value based on type
-                $castedValue = $this->castValueForStorage($value, $setting->type);
+            // Parse the key to get group and key name
+            $parts = explode('.', $key);
+            if (count($parts) === 2) {
+                $group = $parts[0];
+                $keyName = $parts[1];
                 
-                $setting->update(['value' => $castedValue]);
-                
-                // Clear cache
-                Cache::forget("setting.{$key}");
+                // Get the setting to determine its type
+                $setting = Setting::where('group_name', $group)->where('key_name', $keyName)->first();
+                if ($setting) {
+                    $castedValue = $this->castValueForStorage($value, $setting->type);
+                    Setting::setValue($key, $castedValue);
+                }
             }
         }
 
@@ -86,7 +90,7 @@ class SettingsController extends Controller
      */
     public function apiIndex()
     {
-        $settings = Setting::all()->groupBy('group');
+        $settings = Setting::all()->groupBy('group_name');
         
         return response()->json([
             'success' => true,
